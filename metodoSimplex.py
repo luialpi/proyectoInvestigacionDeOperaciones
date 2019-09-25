@@ -103,44 +103,24 @@ class SimplexMethod:
 		return True
 
 	'''
-	Funcion que verifica si ya se obtuvo el valor obtimo
-	'''
-	def optimo(self,cantidadDeColumnas):
-		if self.esMaximo:
-			return self.optimoMax(cantidadDeColumnas)
-		else:
-			return self.optimoMin(cantidadDeColumnas)
-
-	'''
 	Funcion que verifica si ya se obtuvo el valor optimo en el caso de maximizacion
 	para ello verifica que aun existan numeros positivos y retorna true en caso de que aun exista una columna con u positivo
 	'''
-	def optimoMax(self,cantidadDeColumnas):
-		count = 0
+	def optimo(self,cantidadDeColumnas):
+		countMax = 0
+		countMin = 0
 		for x in range(0,cantidadDeColumnas-1):
 			valor = self.matrizTabla[0][x]
 			if(valor < float(0)):
-				count+=1
-		if count > 0:
-			return True
-		else:
-			return False
-					
-					
-	'''
-	Funcion que verifica si ya se obtuvo el valor optimo en el caso de minimizacion
-	para ello verifica que aun existan numeros negaticos y retorna true en caso de que aun exista una columna con u negativo
-	'''    
-	def optimoMin(self,cantidadDeColumnas):
-		count = 0
-		for x in range(0,cantidadDeColumnas-1):
-			valor = self.matrizTabla[0][x]
+				countMax+=1
 			if(valor > float(0)):
-				count+=1
-		if count > 0:
-			return True
+				countMin+=1
+
+		if self.esMaximo:
+			return True if countMax > 0 else False
 		else:
-			return False
+			return True if countMin > 0 else False
+					
 	'''
 	Funcion que modifica la fila pivot para poner el numero pivot en 1
 	'''
