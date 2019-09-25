@@ -33,15 +33,14 @@ class SimplexMethod:
 			print(self.matrizTabla)
 			print(self.variablesFilas, self.variablesColumnas)
 
+		if(self.verificarMultiplesSoluciones())[0] == True:
+			print("Multiples soluciones..")
 	'''
 	Funcion encargada de encontrar el mas negativo
 	para asi saber cual es la columna pivot
 	'''
 	def encontrarColumnaPivot(self,cantidadDeColumnas):
-		if self.esMaximo:
-			return self.encontrarColumnaPivotMax(cantidadDeColumnas)
-		else:
-			return self.encontrarColumnaPivotMin(cantidadDeColumnas)
+		return self.encontrarColumnaPivotMax(cantidadDeColumnas) if self.esMaximo else self.encontrarColumnaPivotMin(cantidadDeColumnas)
 			
 	'''
 	Funcion encargada de encontrar el mas negativo
@@ -144,4 +143,13 @@ class SimplexMethod:
 	'''
 	def intercambiarVariableEntrante(self,columnaPivot,filaPivot):
 		self.variablesFilas[filaPivot]=self.variablesColumnas[columnaPivot]
+
+	def verificarMultiplesSoluciones(self):
+		variablesNoBasicas=len(self.variablesFilas)
+		for i in range(0,len(self.matrizTabla[0])):
+			numero =  self.matrizTabla[0][i]
+			variable = self.variablesColumnas[0][i]
+			if variable not in self.variablesFilas and numero == 0:
+				return [True,i]
+		return False
 
