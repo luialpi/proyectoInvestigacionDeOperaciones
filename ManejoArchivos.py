@@ -160,6 +160,7 @@
     #   - La cantidad de restricciones sea igual a la cantidad de restricciones ingresadas en la primera linea del archivo.
     #   - Cada restriccion tenga valores enteros
     #   - Que la restriccion tenga un formato valido (n coeficientes + mayor, menor o igual + resultado)
+    #   - Que si se usa metodo simplex, que las restricciones solo contengan <=.
     #Entradas:
     #    La listaEntrada generada por leerArchivo.
     #Salidas:
@@ -169,10 +170,12 @@
     #   - La cantidad de restricciones sea igual a la cantidad de restricciones ingresadas en la primera linea del archivo.
     #   - Cada restriccion debe tener valores enteros
     #   - Cada restriccion debe tener un formato valido (n coeficientes + mayor, menor o igual + resultado)
+    #   - Si se usa metodo simplex, las restricciones solo deben contener <=.
     def verificarRestricciones(listaEntrada):
         global cantidadRestricciones
         global cantidadVariablesDecision
         global coeficientesRestricciones
+        global metodo
         coeficientesRestricciones = []
         if (len(listaEntrada)-2) == int(cantidadRestricciones):
             for fila in range (2, len(listaEntrada)):
@@ -184,7 +187,13 @@
                 else:
                     for columna in listaEntrada[fila]:
                         if columna in ["<=", "=", ">="]:
-                            listaTemporal.append(columna)
+                            if columna in ["=", ">="] and metodo == 0:
+                                print("Error. La restriccion numero " + str(fila-1) + " contiene un")
+                                print("\"" + columna + "\" pero el problema es un metodo simplex, por lo que")
+                                print("no se puede resolver. Favor revisar e intentar de nuevo")
+                                exit(0)
+                            else:
+                                listaTemporal.append(columna)
                         else:
                             try:
                                 listaTemporal.append(float(columna))
