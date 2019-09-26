@@ -1,4 +1,4 @@
-
+class ManejoArchivos:
 
     global listaEntrada #Variable tipo Lista que se genera al leer el archivo
     global metodo #Variable tipo float. 0=Simplex, 1=GranM, 2=DosFases, 3=Dual
@@ -9,6 +9,16 @@
     #Ejemplo: [3.0, 5.0]
     global coeficientesRestricciones #Variable tipo Matriz de floats. Los coeficientes de las restricciones y su signo
     #Ejemplo: [[2.0, 1.0, '<=', 6.0], [-1.0, 3.0, '=', 9.0], [0.0, 1.0, '>=', 4.0]]
+
+
+    global esDegenerada #Variable tipo booleana que determina si la solucion es degenerada
+    global nombresColumnas #Variable tipo lista de strings que va a contener los nombres de las columnas
+    #Ejemplo: ['x1', 'x2', 'x3', 'x4', 'Sol', 'DIV']
+    global nombresFilas #Variable tipo lista de strings que va a contener los nombres de las filas
+    #Ejemplo: ['U', 'x2', 'x4']
+    global tabla #Variable de tipo lista de listas de Float, que contiene la tabla de cada iteracion.
+    #Ejemplo: [[c0, c1, c2, c3, c4, c5], [0.25, 1.0, 0.25, 0.0, 2.0, 2.0], [0.5, 0.0, -0.5, 1.0, 0.0, 2.0]]
+    #Siendo ci clases de tipo Z_Aux, que contienen numeroM, numeroSinM, columna a la que pertenece.
     
     #Constructor
     def __init__(self):
@@ -21,11 +31,11 @@
     #   Lista con las configuraciones.
     #Restricciones:
     #   Que el archivo exista.
-    def leerArchivo():
+    def leerArchivo(nombreArchivoEntrada):
         global listaEntrada
         listaEntrada = []
         try:
-            archivoInicial = open("Archivo1.txt", "r")
+            archivoInicial = open(nombreArchivoEntrada, "r")
         except(FileNotFoundError):
             print("Error. Archivo de entrada no presente")
             exit(0)
@@ -35,7 +45,7 @@
             entrada = indice.split(",")
             entrada[len(entrada)-1] = entrada[len(entrada)-1].strip('\n')
             listaEntrada.append(entrada)
-        #return listaEntrada
+        return listaEntrada
 
     #Funcion verificarArchivoConfiguracion. Esta funcion verifica que todos los datos introducidos
     #en el archivo de configuracion esten bien.
@@ -76,7 +86,7 @@
     #Entradas:
     #   El tipo de optimizacion (min o max).
     #Salidas:
-    #   Si el tipo de optimizacion es correcto, se agrega a la variable global tipoOptimizacion.
+    #   Si el tipo de optimizacion es correcto, se agrega a la variable global tipoOptimizacion True para min y False para max.
     #   Si no lo es, se despliega un mensaje de error en consola.
     #Restricciones:
     #   Que el tipo de metodo sea alguno de estos: min o max.
@@ -162,7 +172,7 @@
     #   - Que la restriccion tenga un formato valido (n coeficientes + mayor, menor o igual + resultado)
     #   - Que si se usa metodo simplex, que las restricciones solo contengan <=.
     #Entradas:
-    #    La listaEntrada generada por leerArchivo.
+    #   La listaEntrada generada por leerArchivo.
     #Salidas:
     #   Si las tres restricciones se cumplen, se agrega la lista de restricciones a coeficientesRestricciones.
     #   Si alguno falla, se despliega un mensaje de error en consola con lo que fallo.
@@ -210,3 +220,96 @@
             print("Error. La cantidad de restricciones no concuerda.")
             print("Favor revisar e intentar de nuevo.")
             exit(0)
+
+
+    #Funcion verificarDegenerada. Si una solucion tiene degenerada, se llama a esta funcion, para incluirlo en el archivo de solucion.
+    #Entradas:
+    #   estadoDegenerada: Es un int que nos dice en que numero de estado se encontro la degenerada.
+    #   esDegenerada: Variable tipo booleana que determina si la solucion es degenerada.
+    #Salidas:
+    #   Si existe degenerada, imprime en el archivo que hubo una solucion degenerada.
+    #Restricciones:
+    #   Ninguna.
+    def verificarDegenerada(estadoDegenerada):
+        global esDegenerada
+        if esDegenerada == True:
+            #print("\n\n Aviso: En el estado " + str(estadoDegenerada) + " se encontro una solucion degenerada. \n")
+            archivo.write("\n\n Aviso: En el estado " + str(estadoDegenerada) + " se encontro una solucion degenerada. \n")
+
+
+#---------------------------Impresion gran M---------------------------#
+            
+    #Funcion imprimirColumnas. Esta se va a usar dentro de la funcion imprimirMatriz para imprimir los nombres de las columnas 
+    #en el archivo para cada iteracion. 
+    #Entradas:
+    #   nombresColumnas: Variable global tipo lista de strings que va a contener los nombres de las columnas
+    #Salidas:
+    #   Imprime en el archivo los nombres de las columnas para cada iteracion.
+    #Restricciones:
+    #   Ninguna.
+    def imprimirNombreColumnas():
+        global nombresColumnas
+        lineaColumnas = "|\t|"
+        lineaInferior = "********"
+        lineaSuperior = "\n\n\n********"
+        for indice in nombresColumnas:
+            lineaSuperior = lineaSuperior + "*************"
+            lineaColumnas = lineaColumnas + indice + "\t     |"
+            lineaInferior = lineaInferior + "*************"
+        lineaInferior = lineaInferior + "****************"
+        lineaSuperior = lineaSuperior + "****************"
+        print(lineaSuperior + "\n" + lineaColumnas + "\n" + lineaInferior)
+        archivo.write("\n" + lineaSuperior + "\n" + lineaColumnas + "\n" + lineaInferior + "\n")
+
+    #Funcion imprimirFuncionObjetivo. Esta funcion se encarga de imprimir la funcion objetivo en el archivo para cada iteracion.
+    #Entradas:
+    #   nombresFilas: Variable global tipo lista de strings que contiene los nombres de las filas.
+    #   tabla: Variable de tipo lista de listas de Float, que contiene la tabla de cada iteracion.
+    #Salidas:
+    #   Imprime en el archivo la funcion objetivo para cada iteracion.
+    #Restricciones:
+    #   Ninguna.
+    def imprimirFuncionObjetivo():
+        global nombresFilas
+        global tabla
+        lineaInferior = "********"
+        lineaFuncionObjetivo = "|" + nombresFilas[0] + "\t|" #Imprime la letra U
+        for valor in tabla[0]:
+            lineaInferior = lineaInferior + "*************"
+            valorM = round(valor.numeroM, 2) #Redondea a dos digitos el valor del numero que se suma / resta con M
+            valorSinM = round(valor.numeroSinM, 2) #Redondea a dos digitos el valor del numero que esta multiplicado con M
+            if valor.numeroM == 0: #Si la M es cero
+                lineaFuncionObjetivo = lineaFuncionObjetivo + str(valorSinM) + "\t     |" #Se imprime solo el valor sin M
+            elif valor.numeroM != 0 and valor.numeroSinM == 0: #Si la M no es cero, pero el valor sin M es cero
+                lineaFuncionObjetivo = lineaFuncionObjetivo + str(valorM) + "M\t    |" #Se imprime el valor M
+            else: #Si ambos tienen valores
+                lineaFuncionObjetivo = lineaFuncionObjetivo + str(valorSinM) + "+" + str(valorM) + "M\t    |" #Se imprimen ambos
+        lineaInferior = lineaInferior + "****************"
+        print(lineaFuncionObjetivo + "\n" + lineaInferior)
+        archivo.write(lineaFuncionObjetivo + "\n" + lineaInferior + "\n")
+
+
+    #Funcion imprimirMatriz. Esta funcion se encarga de imprimir la funcion objetivo en el archivo para cada iteracion.
+    #Entradas:
+    #   nombresFilas: Variable global tipo lista de strings que contiene los nombres de las filas.
+    #   tabla: Variable de tipo lista de listas de Float, que contiene la tabla de cada iteracion.
+    #Salidas:
+    #   Imprime en el archivo la funcion objetivo para cada iteracion.
+    #Restricciones:
+    #   Ninguna.
+    def imprimirMatriz():
+        global nombresFilas
+        global tabla
+        if(len(tabla) is not 0): #Si la tabla no esta vacia
+            ManejoArchivos.imprimirNombreColumnas()
+            ManejoArchivos.imprimirFuncionObjetivo()
+            for filaTabla in tabla[1:len(tabla)]: #Lineas que no tienen funcion objetivo
+                lineaInferior = "********"
+                filaFinal = "|" + nombresFilas[tabla.index(filaTabla)] + "\t|" #Agrega el nombre de la fila a la fila a imprimir
+                for columnaTabla in filaTabla:
+                    lineaInferior = lineaInferior + "*************"
+                    valor = round(columnaTabla, 2) #Redondea el valor a dos digitos
+                    filaFinal = filaFinal + str(valor) + "\t     |"
+                lineaInferior = lineaInferior + "****************"
+                archivo.write(filaFinal + "\n" + lineaInferior + "\n")
+                print(filaFinal + "\n" + lineaInferior)
