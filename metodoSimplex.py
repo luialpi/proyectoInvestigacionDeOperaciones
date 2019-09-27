@@ -1,73 +1,60 @@
-class SimplexMethod:
+class MetodoSimplex:
 
-	def __init__(self, matriz, variablesColumnas, variablesFilas, esMaximo):
-		self.matrizTabla = matriz
+	def __init__(self):
+		pass
+
+	'''
+	simpexVar True para generar la matriz con variables
+	'''
+	def inicializarSimplex(self, simplexVar, matriz, esMaximo, variablesColumnas=None, variablesFilas=None):
+		if simplexVar == True:
+			self.tablaSimplex = self.agregarVariablesDeHolgura(matriz)
+			self.simularDespejeDeU()
+		else:
+			self.tablaSimplex = matriz
 		self.esMaximo = esMaximo
-		self.variablesColumnas = variablesColumnas
-		self.variablesFilas = variablesFilas
+		self.variablesColumnas = variablesColumnas if variablesColumnas != None else self.generarVariablesParaColumnas()
+		self.variablesFilas = variablesFilas if variablesFilas != None else self.generarVariablesParaFilas()
 
 	'''
 	funcion principal del metodo simplex
 	'''
 	def simplex(self):
-		cantidadDeFilas = len(self.matrizTabla)
-		cantidadDeColumnas = len(self.matrizTabla[0])
+		cantidadDeFilas = len(self.tablaSimplex)
+		cantidadDeColumnas = len(self.tablaSimplex[0])
 		columnaPivot = -1
 		filaPivot = -1
 
-		print(self.matrizTabla)
-		print(self.variablesFilas)
-
 		while(self.optimo(cantidadDeColumnas)):
-			columnaPivot = self.encontrarColumnaPivot(cantidadDeColumnas)
-			filaPivot = self.encontrarFilaPivot(cantidadDeFilas,cantidadDeColumnas,columnaPivot)
-			self.intercambiarVariableEntrante(columnaPivot,filaPivot)
 
+			columnaPivot = self.encontrarColumnaPivot(cantidadDeColumnas)
+			filaPivotYDegenerada = self.encontrarFilaPivot(cantidadDeFilas,cantidadDeColumnas,columnaPivot)
+			filaPivot = filaPivotYDegenerada[0]
+			self.intercambiarVariableEntrante(columnaPivot,filaPivot)
+			if(self.verificarDegenerada(filaPivotYDegenerada[1])):
+				print("solucion degenerada...")
 			if(filaPivot < 0):
 				print("solucion no acotada...")
 				break
-
 			self.modificarFilaPivot(cantidadDeColumnas,columnaPivot,filaPivot)
 			self.modificarFilas(cantidadDeFilas,cantidadDeColumnas,columnaPivot,filaPivot)
-
-			print(self.matrizTabla)
-			print(self.variablesFilas, self.variablesColumnas)
-
-		if(self.verificarMultiplesSoluciones())[0] == True:
-			print("Multiples soluciones..")
+	
 	'''
-	Funcion encargada de encontrar el mas negativo
-	para asi saber cual es la columna pivot
+	Funcion encargada la columnaPivot
 	'''
 	def encontrarColumnaPivot(self,cantidadDeColumnas):
-		return self.encontrarColumnaPivotMax(cantidadDeColumnas) if self.esMaximo else self.encontrarColumnaPivotMin(cantidadDeColumnas)
-			
-	'''
-	Funcion encargada de encontrar el mas negativo
-	para asi saber cual es la columna pivot
-	'''
-	def encontrarColumnaPivotMax(self,cantidadDeColumnas):
 		
-		pivot=self.matrizTabla[0][0]
-		columna_pivot_indice=0
+		pivot=self.tablaSimplex[0][0]
+		columna_pivot_indice_max=0
+		columna_pivot_indice_min=0
 		for x in range(cantidadDeColumnas-2):
-			if pivot > self.matrizTabla[0][x] and self.matrizTabla[0][x] < 0 :
-				pivot = (self.matrizTabla[0][x])
-				columna_pivot_indice=x
-		return columna_pivot_indice
-
-	'''
-	Funcion encargada de encontrar el mas positivo
-	para asi saber cual es la columna pivot
-	'''
-	def encontrarColumnaPivotMin(self,cantidadDeColumnas):
-		pivot=(self.matrizTabla[0][0])
-		columna_pivot_indice=0
-		for x in range(cantidadDeColumnas-2):
-			if pivot < self.matrizTabla[0][x] and self.matrizTabla[0][x] > 0 :
-				pivot = (self.matrizTabla[0][x])
-				columna_pivot_indice=x
-		return columna_pivot_indice
+			if pivot > self.tablaSimplex[0][x] and self.tablaSimplex[0][x] < 0 :
+				pivot = (self.tablaSimplex[0][x])
+				columna_pivot_indice_max=x
+			if pivot < self.tablaSimplex[0][x] and self.tablaSimplex[0][x] > 0 :
+				pivot = (self.tablaSimplex[0][x])
+				columna_pivot_indice_min=x
+		return columna_pivot_indice_max if self.esMaximo else columna_pivot_indice_min
 
 	'''
 	Funcion encargada de encontrar cual es el menor positivo
@@ -77,9 +64,11 @@ class SimplexMethod:
 		pivot = -1
 		pivotAuxiliar = 0
 		indiceDeControl = 0
+		listaParaDegenerada = []
 		for x in range(1,cantidadDeFilas):
-			if self.matrizTabla[x][columnaPivot] > 0:
-				division = self.matrizTabla[x][cantidadDeColumnas-1] / self.matrizTabla[x][columnaPivot]
+			if self.tablaSimplex[x][columnaPivot] > 0:
+				division = self.tablaSimplex[x][cantidadDeColumnas-1] / self.tablaSimplex[x][columnaPivot]
+				listaParaDegenerada.append(division)
 				if( indiceDeControl == 0):
 					indiceDeControl=indiceDeControl+1
 					pivotAuxiliar = division
@@ -87,7 +76,7 @@ class SimplexMethod:
 				elif( division > 0 and division < pivotAuxiliar):
 					pivotAuxiliar = division
 					pivot = x
-		return pivot
+		return [pivot, listaParaDegenerada]
 
 	'''
 	Funcion que verifica la optimalidad de los resultados
@@ -97,7 +86,7 @@ class SimplexMethod:
 		n=0
 		fila=-1
 		for x in range(1,cantidadDeFilas):
-			if self.matrizTabla[x][lenMatrizTabla-1] < 0:
+			if self.tablaSimplex[x][lentablaSimplex-1] < 0:
 				return False
 		return True
 
@@ -109,34 +98,33 @@ class SimplexMethod:
 		countMax = 0
 		countMin = 0
 		for x in range(0,cantidadDeColumnas-1):
-			valor = self.matrizTabla[0][x]
-			if(valor < float(0)):
+			valor = self.tablaSimplex[0][x]
+			if(valor < 0):
 				countMax+=1
-			if(valor > float(0)):
+			if(valor > 0):
 				countMin+=1
-
 		if self.esMaximo:
-			return True if countMax > 0 else False
+			return countMax > 0 
 		else:
-			return True if countMin > 0 else False
+			return countMin > 0 
 					
 	'''
 	Funcion que modifica la fila pivot para poner el numero pivot en 1
 	'''
 	def modificarFilaPivot(self,cantidadDeColumnas,columnaPivot,filaPivot):
-		numeroPivot =  self.matrizTabla[filaPivot][columnaPivot]
+		numeroPivot =  self.tablaSimplex[filaPivot][columnaPivot]
 		for i in range(0, cantidadDeColumnas):
-			self.matrizTabla[filaPivot][i] = self.matrizTabla[filaPivot][i] / numeroPivot
+			self.tablaSimplex[filaPivot][i] = self.tablaSimplex[filaPivot][i] / numeroPivot
 
 	'''
 	Funcion que efectua operaciones en las filas de manera que se logre obtener un 0 en la columna pivot
 	'''
 	def modificarFilas(self,cantidadDeFilas,cantidadDeColumnas,columnaPivot,filaPivot):
 		for i in range(0,cantidadDeFilas):
-			variableParaDivision = self.matrizTabla[i][columnaPivot]
+			variableParaDivision = self.tablaSimplex[i][columnaPivot]
 			if( i != filaPivot ):
 				for j in range(0,cantidadDeColumnas):
-					self.matrizTabla[i][j] = self.matrizTabla[i][j] - ( self.matrizTabla[filaPivot][j] * variableParaDivision)
+					self.tablaSimplex[i][j] = self.tablaSimplex[i][j] - ( self.tablaSimplex[filaPivot][j] * variableParaDivision)
 
 	'''
 	Funcion que modifica la variable entrante y la pone en lugar de la saliente
@@ -144,12 +132,57 @@ class SimplexMethod:
 	def intercambiarVariableEntrante(self,columnaPivot,filaPivot):
 		self.variablesFilas[filaPivot]=self.variablesColumnas[columnaPivot]
 
+	'''
+	Funcion que verifica si se trata de un problema con multiples soluciones
+	'''
 	def verificarMultiplesSoluciones(self):
 		variablesNoBasicas=len(self.variablesFilas)
-		for i in range(0,len(self.matrizTabla[0])):
-			numero =  self.matrizTabla[0][i]
-			variable = self.variablesColumnas[0][i]
+		for i in range(0,len(self.tablaSimplex[0])-2):
+			numero =  self.tablaSimplex[0][i]
+			variable = self.variablesColumnas[i]
+			print(variable, numero)
 			if variable not in self.variablesFilas and numero == 0:
-				return [True,i]
-		return False
+				return i
+		return -1
 
+	def agregarVariablesDeHolgura(self, matriz):
+		numeroDeVariables = len(matriz) -1
+		iteraccion = 0
+		for i in range(0, len(matriz)):
+			matriz[i] = matriz[i][:-1]
+			for n in range(0, numeroDeVariables):
+				if i == 0:
+					matriz[i].insert(len(matriz[i])-1,0)
+				else:
+					matriz[i].insert(len(matriz[i])-1,1) if i == n+1 else matriz[i].insert(len(matriz[i])-1,0)
+		return matriz
+
+	def simularDespejeDeU(self):
+		for i in range( 0, len( self.tablaSimplex[0] ) -1 ):
+			self.tablaSimplex[0][i]*=-1
+ 		
+	def generarVariablesParaColumnas(self):
+		cantidadResticciones = len(self.tablaSimplex)-1
+		cantidadDeVariables = len(self.tablaSimplex[0])-(cantidadResticciones+1)
+		nombresColumnas=[]
+		for valor in range(cantidadDeVariables):
+			nombresColumnas.append("x" + str(valor + 1))
+		for valor in range(cantidadResticciones):
+			nombresColumnas.append("S" + str(valor + 1))
+		return nombresColumnas
+
+	def generarVariablesParaFilas(self):
+		cantidadResticciones = len(self.tablaSimplex)-1
+		nombresFilas = ['U']
+		for valor in range(cantidadResticciones):
+			nombresFilas.append("S" + str(valor + 1))
+		return nombresFilas
+
+	def verificarDegenerada(self, arreglo):
+		seen = set()
+		uniq = [x for x in arreglo if x not in seen and not seen.add(x)] 
+		return len(uniq) < 0
+
+	##No factible: que uno de los valores finales no cumple con las restricciones iniciales
+
+##fin
