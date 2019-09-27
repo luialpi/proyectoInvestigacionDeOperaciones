@@ -50,6 +50,8 @@ class VerificarArchivoEntrada:
             filaNueva.append(fila[-2])
             matrizInicial.append(filaNueva)
 
+        matrizInicial[0].append(0.0)
+        matrizInicial[0].append("=")
         #print([matrizInicial, nombresColumnas, nombresFilas, tipoOptimizacion])
         #return [matrizInicial, nombresColumnas, nombresFilas, tipoOptimizacion]
         return [matrizInicial, tipoOptimizacion]
