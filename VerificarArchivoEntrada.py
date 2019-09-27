@@ -1,4 +1,4 @@
-
+class VerificarArchivoEntrada:
 
     global nombreArchivoEntrada
     global metodo #Variable tipo float. 0=Simplex, 1=GranM, 2=DosFases, 3=Dual
