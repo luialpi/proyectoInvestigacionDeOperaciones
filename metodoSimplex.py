@@ -19,7 +19,7 @@ class MetodoSimplex:
 	'''
 	funcion principal del metodo simplex
 	'''
-	def simplex(self):
+	def mainSimplex(self):
 		cantidadDeFilas = len(self.tablaSimplex)
 		cantidadDeColumnas = len(self.tablaSimplex[0])
 		columnaPivot = -1
@@ -35,9 +35,12 @@ class MetodoSimplex:
 				print("solucion degenerada...")
 			if(filaPivot < 0):
 				print("solucion no acotada...")
-				break
+				return []
+				
 			self.modificarFilaPivot(cantidadDeColumnas,columnaPivot,filaPivot)
 			self.modificarFilas(cantidadDeFilas,cantidadDeColumnas,columnaPivot,filaPivot)
+		
+		return [self.tablaSimplex, self.variablesColumnas, self.variablesFilas]
 	
 	'''
 	Funcion encargada la columnaPivot
