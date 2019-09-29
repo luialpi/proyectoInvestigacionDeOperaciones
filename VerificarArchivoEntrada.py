@@ -1,29 +1,89 @@
-class ManejoArchivos:
+class VerificarArchivoEntrada:
 
-    global listaEntrada #Variable tipo Lista que se genera al leer el archivo
+    global nombreArchivoEntrada
     global metodo #Variable tipo float. 0=Simplex, 1=GranM, 2=DosFases, 3=Dual
-    global tipoOptimizacion #Variable tipo booleana. True=min, False=max
+    global tipoOptimizacion #Variable tipo booleana. True=max, False=min
     global cantidadVariablesDecision #Variable tipo float. Cantidad de variables de decision
     global cantidadRestricciones #Variable tipo float. Cantidad de restricciones
     global coeficientesFuncionObjetivo #Variable tipo Lista de floats. Los coeficientes de las variables de la funcion objetivo
     #Ejemplo: [3.0, 5.0]
     global coeficientesRestricciones #Variable tipo Matriz de floats. Los coeficientes de las restricciones y su signo
     #Ejemplo: [[2.0, 1.0, '<=', 6.0], [-1.0, 3.0, '=', 9.0], [0.0, 1.0, '>=', 4.0]]
-
-
-    global esDegenerada #Variable tipo booleana que determina si la solucion es degenerada
-    global nombresColumnas #Variable tipo lista de strings que va a contener los nombres de las columnas
-    #Ejemplo: ['x1', 'x2', 'x3', 'x4', 'Sol', 'DIV']
-    global nombresFilas #Variable tipo lista de strings que va a contener los nombres de las filas
-    #Ejemplo: ['U', 'x2', 'x4']
-    global tabla #Variable de tipo lista de listas de Float, que contiene la tabla de cada iteracion.
-    #Ejemplo: [[c0, c1, c2, c3, c4, c5], [0.25, 1.0, 0.25, 0.0, 2.0, 2.0], [0.5, 0.0, -0.5, 1.0, 0.0, 2.0]]
-    #Siendo ci clases de tipo Z_Aux, que contienen numeroM, numeroSinM, columna a la que pertenece.
     
+    global esArchivoConError #Variable booleana que se activa si el archivo de entrada genero un error. 
+
     #Constructor
     def __init__(self):
         pass
 
+    #Funcion getListaConfiguraciones. Regresa las configuraciones necesarias para correr cada metodo.
+    #Dependiendo del metodo, se devuelve una lista de configuraciones diferente.
+    def getListaConfiguraciones():
+        global metodo
+        elegirMetodo = {0:VerificarArchivoEntrada.generarVariablesSimplex(), 1:VerificarArchivoEntrada.generarVariablesGranM(), 2:2, 3:3}
+        return [metodo, elegirMetodo.get(metodo)]
+
+    def generarVariablesSimplex():
+        global cantidadVariablesDecision
+        global cantidadRestricciones
+        global coeficientesFuncionObjetivo
+        global coeficientesRestricciones
+        global tipoOptimizacion
+        #nombresColumnas = []
+        #nombresFilas = ["U"]
+
+        #hacer un for para que la funcion objetivo quede del mismo tamano.
+        matrizInicial = []
+        matrizInicial.append(coeficientesFuncionObjetivo) #Formato [[3,5], [2, 1, 6, <=], [-1, 3, 9, =], [0, 1, 4, >=,]]
+        #for valor in range(cantidadVariablesDecision):
+        #    nombresColumnas.append("x" + str(valor + 1))
+
+        #for valor in range(cantidadRestricciones):
+        #    nombresColumnas.append("S" + str(valor + 1))
+        #    nombresFilas.append("S" + str(valor + 1))
+
+        for fila in coeficientesRestricciones:
+            filaNueva = []
+            for valor in fila:
+                if valor not in ["=", ">=", "<="]:
+                    filaNueva.append(valor)
+            filaNueva.append(fila[-2])
+            matrizInicial.append(filaNueva)
+
+        matrizInicial[0].append(0.0)
+        matrizInicial[0].append("=")
+        #print([matrizInicial, nombresColumnas, nombresFilas, tipoOptimizacion])
+        #return [matrizInicial, nombresColumnas, nombresFilas, tipoOptimizacion]
+        return [matrizInicial, tipoOptimizacion]
+        
+    def generarVariablesGranM():
+        global cantidadVariablesDecision
+        global cantidadRestricciones
+        global coeficientesFuncionObjetivo
+        global coeficientesRestricciones
+        global tipoOptimizacion
+        #Entrada: [nombreArchivoEntrada,
+        #False=max, True=min, [coeficientesFuncionObjetivo],
+        #[[restriccion1, al final desigualdad, final-1 resultado]], numero variables]
+
+        coeficientesNuevosRestricciones = []
+        for fila in coeficientesRestricciones:
+            filaNueva = []
+            for valor in fila:
+                if valor not in ["=", ">=", "<="]:
+                    filaNueva.append(valor)
+            filaNueva.append(fila[-2])
+            coeficientesNuevosRestricciones.append(filaNueva)
+        
+        return [cantidadVariablesDecision, coeficientesNuevosRestricciones, coeficientesFuncionObjetivo, not tipoOptimizacion]
+
+    def generarVariablesDosFases():
+        return "variablesDosFases"
+
+    def generarVariablesDual():
+        return "variablesDual"
+        
+    
     #Funcion leerArchivo. Lee el archivo de configuracion para convertirlo en una lista.
     #Entradas:
     #   Archivo de configuracion.
@@ -32,20 +92,29 @@ class ManejoArchivos:
     #Restricciones:
     #   Que el archivo exista.
     def leerArchivo(nombreArchivoEntrada):
-        global listaEntrada
+        global esArchivoConError
+        esArchivoConError = False
         listaEntrada = []
         try:
             archivoInicial = open(nombreArchivoEntrada, "r")
         except(FileNotFoundError):
-            print("Error. Archivo de entrada no presente")
-            exit(0)
+            print("Error. Archivo de entrada: \"" + nombreArchivoEntrada + "\" no presente.\n")
+            esArchivoConError = True
+            return esArchivoConError
+        except(OSError):
+            print("Error de OS: El argumento: \"" + nombreArchivoEntrada + "\" es invalido.\n")
+            esArchivoConError = True
+            return esArchivoConError
+            
         listaArchivo = archivoInicial.readlines()
         archivoInicial.close()
         for indice in listaArchivo:
             entrada = indice.split(",")
             entrada[len(entrada)-1] = entrada[len(entrada)-1].strip('\n')
             listaEntrada.append(entrada)
-        return listaEntrada
+        
+        VerificarArchivoEntrada.verificarArchivoConfiguracion(listaEntrada)
+        return esArchivoConError
 
     #Funcion verificarArchivoConfiguracion. Esta funcion verifica que todos los datos introducidos
     #en el archivo de configuracion esten bien.
@@ -55,13 +124,12 @@ class ManejoArchivos:
     #   Ninguna.
     #Restricciones:
     #   Ninguna.
-    def verificarArchivoConfiguracion():
-        global listaEntrada
-        ManejoArchivos.verificarTipoMetodo(listaEntrada[0][0])
-        ManejoArchivos.verificarTipoOptimizacion(listaEntrada[0][1])
-        ManejoArchivos.verificarCantidadArgumentos(listaEntrada[0])
-        ManejoArchivos.verificarCoeficientesFuncionObjetivo(listaEntrada[1])
-        ManejoArchivos.verificarRestricciones(listaEntrada)
+    def verificarArchivoConfiguracion(listaEntrada):
+        VerificarArchivoEntrada.verificarTipoMetodo(listaEntrada[0][0])
+        VerificarArchivoEntrada.verificarTipoOptimizacion(listaEntrada[0][1])
+        VerificarArchivoEntrada.verificarCantidadArgumentos(listaEntrada[0])
+        VerificarArchivoEntrada.verificarCoeficientesFuncionObjetivo(listaEntrada[1])
+        VerificarArchivoEntrada.verificarRestricciones(listaEntrada)
 
     #Funcion verificarTipoMetodo. Verifica que el metodo introducido sea correcto y este dentro de la lista
     #de valores correctos.
@@ -74,13 +142,14 @@ class ManejoArchivos:
     #   Que el tipo de metodo sea alguno de estos: 0=Simplex, 1=GranM, 2=DosFases, 3=Dual
     def verificarTipoMetodo(tipoMetodo):
         global metodo
+        global esArchivoConError
         metodo = ""
         if tipoMetodo in ["0", "1", "2", "3"]:
             metodo = int(tipoMetodo)
         else:
             print("Error. El tipo de metodo ingresado es incorrecto.")
             print("Favor ingresar 0=Simplex, 1=GranM, 2=DosFases, 3=Dual")
-            exit(0)
+            esArchivoConError = True
 
     #Funcion verificarTipoOptimizacion. Verifica que el tipo de optimizacion sea correcta (min o max).
     #Entradas:
@@ -92,17 +161,18 @@ class ManejoArchivos:
     #   Que el tipo de metodo sea alguno de estos: min o max.
     def verificarTipoOptimizacion(optimizacion):
         global tipoOptimizacion
-        tipoOptimizacion = False
+        global esArchivoConError
+        tipoOptimizacion = ""
         if optimizacion == "max" or optimizacion == "min":
             if optimizacion == "max":
-                tipoOptimizacion = False
+                tipoOptimizacion = True
                 return
             else:
-                tipoOptimizacion = True
+                tipoOptimizacion = False
         else:
             print("Error. El tipo de optimizacion ingresado es incorrecto.")
             print("Favor ingrese \"min\" o \"max\"")
-            exit(0)
+            esArchivoConError = True
 
     #Funcion verificarCantidadArgumentos. Verifica que la cantidad de argumentos de la primera linea del archivo
     #sea el correcto (cuatro). Tambien verifica que la cantidad de variables de decision y la cantidad de
@@ -120,6 +190,7 @@ class ManejoArchivos:
     def verificarCantidadArgumentos(primeraLineaEntradas):
         global cantidadVariablesDecision
         global cantidadRestricciones
+        global esArchivoConError
         if len(primeraLineaEntradas) == 4:
             try:
                 cantidadVariablesDecision = int(primeraLineaEntradas[2])
@@ -128,12 +199,12 @@ class ManejoArchivos:
                 print("Error. Los valores ingresados para el numero de variables de decision")
                 print("y numero de restricciones no son numeros enteros.")
                 print("Favor ingresar numeros validos.")
-                exit(0)
+                esArchivoConError = True
         else:
             print("Error. La cantidad de argumentos en la primera linea del archivo no esta correcta.")
             print("Favor ingresar en este orden, separado por comas y sin espacios:")
             print("Metodo, optimizacion, numero de variables de decision, numero de restricciones.")
-            exit(0)
+            esArchivoConError = True
 
     #Funcion verificarCoeficientesFuncionObjetivo. Verifica que la cantidad de coeficientes de la funcion 
     #objetivo concuerde con la cantidad de variables de decision. Tambien verifica que los coeficientes
@@ -151,6 +222,7 @@ class ManejoArchivos:
     def verificarCoeficientesFuncionObjetivo(funcionObjetivo):
         global cantidadVariablesDecision
         global coeficientesFuncionObjetivo
+        global esArchivoConError
         coeficientesFuncionObjetivo = []
         if cantidadVariablesDecision == len(funcionObjetivo):
             for indice in funcionObjetivo:
@@ -159,12 +231,12 @@ class ManejoArchivos:
                 except ValueError:
                     print("Error. Uno de los coeficientes de la funcion objetivo no es un numero entero.")
                     print("Favor ingresar numeros validos.")
-                    exit(0)
+                    esArchivoConError = True
             return
         else:
             print("Error. La cantidad de coeficientes de la funcion objetivo es distinta")
             print("a la cantidad de variables de decision.")
-            exit(0)
+            esArchivoConError = True
 
     #Funcion verificarRestricciones. Verifica que
     #   - La cantidad de restricciones sea igual a la cantidad de restricciones ingresadas en la primera linea del archivo.
@@ -186,6 +258,7 @@ class ManejoArchivos:
         global cantidadVariablesDecision
         global coeficientesRestricciones
         global metodo
+        global esArchivoConError
         coeficientesRestricciones = []
         if (len(listaEntrada)-2) == int(cantidadRestricciones):
             for fila in range (2, len(listaEntrada)):
@@ -193,7 +266,7 @@ class ManejoArchivos:
                 if (len(listaEntrada[fila])-2) != cantidadVariablesDecision:
                     print("Error. La restriccion numero " + str(fila-1) + " contiene un numero")
                     print("de variables incorrecto. Favor revisar e intentar de nuevo.")
-                    exit(0)
+                    esArchivoConError = True
                 else:
                     for columna in listaEntrada[fila]:
                         if columna in ["<=", "=", ">="]:
@@ -201,7 +274,7 @@ class ManejoArchivos:
                                 print("Error. La restriccion numero " + str(fila-1) + " contiene un")
                                 print("\"" + columna + "\" pero el problema es un metodo simplex, por lo que")
                                 print("no se puede resolver. Favor revisar e intentar de nuevo")
-                                exit(0)
+                                esArchivoConError = True
                             else:
                                 listaTemporal.append(columna)
                         else:
@@ -210,106 +283,13 @@ class ManejoArchivos:
                             except ValueError:
                                 print("Error. Alguno de los coeficientes de la restriccion " + str(fila-1))
                                 print("No es un valor entero. Favor revisar e intentar de nuevo.")
-                                exit(0)
+                                esArchivoConError = True
                 if (listaEntrada[fila][-2]) not in ["<=", "=", ">="]:
                     print("Error. La restriccion " + str(fila-1) + " no posee un formato valido.")
                     print("Favor revisar e intentar de nuevo.")
-                    exit(0)
+                    esArchivoConError = True
                 coeficientesRestricciones.append(listaTemporal)
         else:
             print("Error. La cantidad de restricciones no concuerda.")
             print("Favor revisar e intentar de nuevo.")
-            exit(0)
-
-
-    #Funcion verificarDegenerada. Si una solucion tiene degenerada, se llama a esta funcion, para incluirlo en el archivo de solucion.
-    #Entradas:
-    #   estadoDegenerada: Es un int que nos dice en que numero de estado se encontro la degenerada.
-    #   esDegenerada: Variable tipo booleana que determina si la solucion es degenerada.
-    #Salidas:
-    #   Si existe degenerada, imprime en el archivo que hubo una solucion degenerada.
-    #Restricciones:
-    #   Ninguna.
-    def verificarDegenerada(estadoDegenerada):
-        global esDegenerada
-        if esDegenerada == True:
-            #print("\n\n Aviso: En el estado " + str(estadoDegenerada) + " se encontro una solucion degenerada. \n")
-            archivo.write("\n\n Aviso: En el estado " + str(estadoDegenerada) + " se encontro una solucion degenerada. \n")
-
-
-#---------------------------Impresion gran M---------------------------#
-            
-    #Funcion imprimirColumnas. Esta se va a usar dentro de la funcion imprimirMatriz para imprimir los nombres de las columnas 
-    #en el archivo para cada iteracion. 
-    #Entradas:
-    #   nombresColumnas: Variable global tipo lista de strings que va a contener los nombres de las columnas
-    #Salidas:
-    #   Imprime en el archivo los nombres de las columnas para cada iteracion.
-    #Restricciones:
-    #   Ninguna.
-    def imprimirNombreColumnas():
-        global nombresColumnas
-        lineaColumnas = "|\t|"
-        lineaInferior = "********"
-        lineaSuperior = "\n\n\n********"
-        for indice in nombresColumnas:
-            lineaSuperior = lineaSuperior + "*************"
-            lineaColumnas = lineaColumnas + indice + "\t     |"
-            lineaInferior = lineaInferior + "*************"
-        lineaInferior = lineaInferior + "****************"
-        lineaSuperior = lineaSuperior + "****************"
-        print(lineaSuperior + "\n" + lineaColumnas + "\n" + lineaInferior)
-        archivo.write("\n" + lineaSuperior + "\n" + lineaColumnas + "\n" + lineaInferior + "\n")
-
-    #Funcion imprimirFuncionObjetivo. Esta funcion se encarga de imprimir la funcion objetivo en el archivo para cada iteracion.
-    #Entradas:
-    #   nombresFilas: Variable global tipo lista de strings que contiene los nombres de las filas.
-    #   tabla: Variable de tipo lista de listas de Float, que contiene la tabla de cada iteracion.
-    #Salidas:
-    #   Imprime en el archivo la funcion objetivo para cada iteracion.
-    #Restricciones:
-    #   Ninguna.
-    def imprimirFuncionObjetivo():
-        global nombresFilas
-        global tabla
-        lineaInferior = "********"
-        lineaFuncionObjetivo = "|" + nombresFilas[0] + "\t|" #Imprime la letra U
-        for valor in tabla[0]:
-            lineaInferior = lineaInferior + "*************"
-            valorM = round(valor.numeroM, 2) #Redondea a dos digitos el valor del numero que se suma / resta con M
-            valorSinM = round(valor.numeroSinM, 2) #Redondea a dos digitos el valor del numero que esta multiplicado con M
-            if valor.numeroM == 0: #Si la M es cero
-                lineaFuncionObjetivo = lineaFuncionObjetivo + str(valorSinM) + "\t     |" #Se imprime solo el valor sin M
-            elif valor.numeroM != 0 and valor.numeroSinM == 0: #Si la M no es cero, pero el valor sin M es cero
-                lineaFuncionObjetivo = lineaFuncionObjetivo + str(valorM) + "M\t    |" #Se imprime el valor M
-            else: #Si ambos tienen valores
-                lineaFuncionObjetivo = lineaFuncionObjetivo + str(valorSinM) + "+" + str(valorM) + "M\t    |" #Se imprimen ambos
-        lineaInferior = lineaInferior + "****************"
-        print(lineaFuncionObjetivo + "\n" + lineaInferior)
-        archivo.write(lineaFuncionObjetivo + "\n" + lineaInferior + "\n")
-
-
-    #Funcion imprimirMatriz. Esta funcion se encarga de imprimir la funcion objetivo en el archivo para cada iteracion.
-    #Entradas:
-    #   nombresFilas: Variable global tipo lista de strings que contiene los nombres de las filas.
-    #   tabla: Variable de tipo lista de listas de Float, que contiene la tabla de cada iteracion.
-    #Salidas:
-    #   Imprime en el archivo la funcion objetivo para cada iteracion.
-    #Restricciones:
-    #   Ninguna.
-    def imprimirMatriz():
-        global nombresFilas
-        global tabla
-        if(len(tabla) is not 0): #Si la tabla no esta vacia
-            ManejoArchivos.imprimirNombreColumnas()
-            ManejoArchivos.imprimirFuncionObjetivo()
-            for filaTabla in tabla[1:len(tabla)]: #Lineas que no tienen funcion objetivo
-                lineaInferior = "********"
-                filaFinal = "|" + nombresFilas[tabla.index(filaTabla)] + "\t|" #Agrega el nombre de la fila a la fila a imprimir
-                for columnaTabla in filaTabla:
-                    lineaInferior = lineaInferior + "*************"
-                    valor = round(columnaTabla, 2) #Redondea el valor a dos digitos
-                    filaFinal = filaFinal + str(valor) + "\t     |"
-                lineaInferior = lineaInferior + "****************"
-                archivo.write(filaFinal + "\n" + lineaInferior + "\n")
-                print(filaFinal + "\n" + lineaInferior)
+            esArchivoConError = True
