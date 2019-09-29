@@ -1,12 +1,13 @@
 class MetodoSimplex:
 
-	def __init__(self, archivo):
-		self.archivo = archivo
+	def __init__(self):
+		pass
 
 	'''
 	simpexVar True para generar la matriz con variables
 	'''
-	def inicializarSimplex(self, simplexVar, matriz, esMaximo, variablesColumnas=None, variablesFilas=None):
+	def inicializarSimplex(self, simplexVar, matriz, esMaximo, archivo, variablesColumnas=None, variablesFilas=None):
+		self.archivo = archivo
 		if simplexVar == True:
 			self.tablaSimplex = self.agregarVariablesDeHolgura(matriz)
 			self.simularDespejeDeU()
