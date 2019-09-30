@@ -1,11 +1,14 @@
-
+import argparse
 import sys
 from VerificarArchivoEntrada import *
 from Imprimir import *
 from metodoSimplex import *
+import metodoDual
+from Print import *
 
 def main():
-
+    #Se crea objeto simplex inicial que sera usado para calculos futuros. 
+    simplex = MetodoSimplex()
     #Aqui leemos los argumentos de entrada de la funcion.
     for indice in range (1, len(sys.argv)):
         if sys.argv[indice] in ["-h", "[-h]"]:
@@ -28,18 +31,38 @@ def main():
             print("-1,3,=,9\n")
             print("0,1,>=,4\n")
         else:
-            #print(sys.argv[indice])
-            resultado = VerificarArchivoEntrada.leerArchivo(sys.argv[indice])
-            if resultado == False:
+            #Se lee el archivo de entrada, y se verifica para que venga con buen formato.
+            #Genera un booleano si el archivo esta bien o no.
+            esArchivoConError = VerificarArchivoEntrada.leerArchivo(sys.argv[indice])
+            
+            #Si el archivo no tiene error, entonces se trabaja sobre el mismo.
+            #Si el archivo tiene error, no se hace nada, y se pasa al siguiente archivo.
+            #Esto para que no se caiga el programa. 
+            if esArchivoConError == False:
+                #configuracion es una lista con configuraciones, generada a partir del metodo de entrada. 
                 configuracion = VerificarArchivoEntrada.getListaConfiguraciones()
-                #print(str(configuracion))
 
+                #Se genera el archivo de salida con el nombre que se pide en la especificacion.
                 archivo = ArchivoSalida.crearArchivoSalida(sys.argv[indice])
-                #elegirMetodo = {0:}
-                #elegirMetodo.get(configuracion[0])
-                
-                #Ejemplo diccionario
-                #diccionario = {1:VerificarArchivoEntrada.getListaConfiguraciones()}
-                #print(diccionario.get(configuracion[0]))
+
+                #Se corre el tipo de metodo dependiendo de la entrada.
+                if configuracion[0] == 0:
+                    simplex.inicializarSimplex(True, configuracion[1][0], configuracion[1][1], archivo)
+                    solucionSimplex = simplex.mainSimplex()
+
+                    #Imprimir.imprimirMatrizSimplex(archivo, solucionSimplex[2], solucionSimplex[1], solucionSimplex[0])
+
+                elif configuracion[0] == 1:
+                    #----------------FALTA----------------
+                    return "granM"
+                    
+                elif configuracion[0] == 2:
+                    #----------------FALTA----------------
+                    return "dosFases"
+                elif configuracion[0] == 3:
+                    #----------------FALTA----------------
+                    return "Dual"
+                    #metodoDualSalida = metodoDual()
+                    #metodoDualSalida.mainDual(configuracion[1][0], configuracion[1][1], cantidadVariablesDecision, archivo)
 
 main()

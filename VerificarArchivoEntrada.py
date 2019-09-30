@@ -18,30 +18,39 @@ class VerificarArchivoEntrada:
 
     #Funcion getListaConfiguraciones. Regresa las configuraciones necesarias para correr cada metodo.
     #Dependiendo del metodo, se devuelve una lista de configuraciones diferente.
+    #Entradas:
+    #   metodo. El tipo de metodo que necesita usar.
+    #Salidas:
+    #   metodo. Se ocupa en el main para saber que metodo correr.
+    #   lista de configuraciones dependiendo del metodo.
     def getListaConfiguraciones():
         global metodo
-        elegirMetodo = {0:VerificarArchivoEntrada.generarVariablesSimplex(), 1:VerificarArchivoEntrada.generarVariablesGranM(), 2:2, 3:3}
+        elegirMetodo = {0:VerificarArchivoEntrada.generarVariablesSimplex(), 1:VerificarArchivoEntrada.generarVariablesGranM(), 2:VerificarArchivoEntrada.generarVariablesDosFases(), 3:VerificarArchivoEntrada.generarVariablesDual()}
         return [metodo, elegirMetodo.get(metodo)]
 
+    #Funcion generarVariablesSimplex. Regresa las configuraciones necesarias para correr el metodo simplex.
+    #Entradas:
+    #   cantidadVariablesDecision. Variable tipo float. Cantidad de variables de decision
+    #   cantidadRestricciones. Variable tipo float. Cantidad de restricciones
+    #   coeficientesFuncionObjetivo. Variable tipo Lista de floats. Los coeficientes de las variables de la funcion objetivo
+    #   coeficientesRestricciones. Variable tipo Matriz de floats. Los coeficientes de las restricciones y su signo
+    #   tipoOptimizacion. Variable tipo booleana. True=max, False=min
+    #Salidas:
+    #   matrizInicial. Regresa la matriz inicial necesaria para empezar el simplex.
+    #       ejemplo: [[3, 5, 0, "="], [2, 1, 6, "<="], [-1, 3, 9, "="], [0, 1, 4, ">="]]
+    #   tipoOptimizacion. Variable tipo booleana. True=max, False=min
     def generarVariablesSimplex():
         global cantidadVariablesDecision
         global cantidadRestricciones
         global coeficientesFuncionObjetivo
         global coeficientesRestricciones
         global tipoOptimizacion
-        #nombresColumnas = []
-        #nombresFilas = ["U"]
-
-        #hacer un for para que la funcion objetivo quede del mismo tamano.
+        
+        
         matrizInicial = []
-        matrizInicial.append(coeficientesFuncionObjetivo) #Formato [[3,5], [2, 1, 6, <=], [-1, 3, 9, =], [0, 1, 4, >=,]]
-        #for valor in range(cantidadVariablesDecision):
-        #    nombresColumnas.append("x" + str(valor + 1))
+        matrizInicial.append(coeficientesFuncionObjetivo) #Formato [[3, 5, 0, "="], [2, 1, 6, "<="], [-1, 3, 9, "="], [0, 1, 4, ">="]]
 
-        #for valor in range(cantidadRestricciones):
-        #    nombresColumnas.append("S" + str(valor + 1))
-        #    nombresFilas.append("S" + str(valor + 1))
-
+        #Este for genera la matriz que se ocupa para el metodo simplex. 
         for fila in coeficientesRestricciones:
             filaNueva = []
             for valor in fila:
@@ -50,21 +59,31 @@ class VerificarArchivoEntrada:
             filaNueva.append(fila[-2])
             matrizInicial.append(filaNueva)
 
+        #El simplex ocupa que la funcion objetivo tenga el mismo tamano que las restricciones.
         matrizInicial[0].append(0.0)
         matrizInicial[0].append("=")
-        #print([matrizInicial, nombresColumnas, nombresFilas, tipoOptimizacion])
-        #return [matrizInicial, nombresColumnas, nombresFilas, tipoOptimizacion]
-        return [matrizInicial, tipoOptimizacion]
         
+        return [matrizInicial, tipoOptimizacion]
+
+    #Funcion generarVariablesGranM. Regresa las configuraciones necesarias para correr el metodo Gran M.
+    #Entradas:
+    #   cantidadVariablesDecision. Variable tipo float. Cantidad de variables de decision
+    #   cantidadRestricciones. Variable tipo float. Cantidad de restricciones
+    #   coeficientesFuncionObjetivo. Variable tipo Lista de floats. Los coeficientes de las variables de la funcion objetivo
+    #   coeficientesRestricciones. Variable tipo Matriz de floats. Los coeficientes de las restricciones y su signo
+    #   tipoOptimizacion. Variable tipo booleana. True=max, False=min
+    #Salidas:
+    #   cantidadVariablesDecision. Variable tipo float. Cantidad de variables de decision
+    #   coeficientesNuevosRestricciones. Se acomodan los coeficientes para que el simbolo de desigualdad vaya al final. 
+    #       ejemplo: [[3, 5, 0, "="], [2, 1, 6, "<="], [-1, 3, 9, "="], [0, 1, 4, ">="]]
+    #   coeficientesFuncionObjetivo. Variable tipo Lista de floats. Los coeficientes de las variables de la funcion objetivo
+    #   tipoOptimizacion. Variable tipo booleana. True=min, False=max
     def generarVariablesGranM():
         global cantidadVariablesDecision
         global cantidadRestricciones
         global coeficientesFuncionObjetivo
         global coeficientesRestricciones
         global tipoOptimizacion
-        #Entrada: [nombreArchivoEntrada,
-        #False=max, True=min, [coeficientesFuncionObjetivo],
-        #[[restriccion1, al final desigualdad, final-1 resultado]], numero variables]
 
         coeficientesNuevosRestricciones = []
         for fila in coeficientesRestricciones:
@@ -77,9 +96,19 @@ class VerificarArchivoEntrada:
         
         return [cantidadVariablesDecision, coeficientesNuevosRestricciones, coeficientesFuncionObjetivo, not tipoOptimizacion]
 
+    #Funcion generarVariablesDosFases. Regresa las configuraciones necesarias para correr el metodo Dos Fases.
+    #Entradas:
+    #----------------------------PENDIENTE-------------------
+    #Salidas:
+    #----------------------------PENDIENTE-------------------
     def generarVariablesDosFases():
         return "variablesDosFases"
 
+    #Funcion generarVariablesDual. Regresa las configuraciones necesarias para correr el metodo Dual.
+    #Entradas:
+    #----------------------------PENDIENTE-------------------
+    #Salidas:
+    #----------------------------PENDIENTE-------------------
     def generarVariablesDual():
         return "variablesDual"
         

@@ -12,6 +12,21 @@ class ArchivoSalida:
     def cerrarArchivoSalida(archivo):
         archivo.close()
 
+
+class Z_Aux:
+    #Constructor
+    '''
+    Clase en la cual se cuenta con un constructor encargado de 
+    crear un objeto el cual tiene como atributo numero M
+    numero sin m y letra la cual hace referencia a la columna en 
+    que se ubique, en caso de no tener numero en M el numero que 
+    se le asigne sera un 0
+    '''
+    def __init__(self,numeroM,numeroSinM,letra):
+        self.numeroM= numeroM
+        self.numeroSinM=numeroSinM
+        self.letra=letra
+
 class Imprimir:
 
     global esDegenerada #Variable tipo booleana que determina si la solucion es degenerada
@@ -35,16 +50,14 @@ class Imprimir:
     #   Imprime en el archivo los nombres de las columnas para cada iteracion.
     #Restricciones:
     #   Ninguna.
-    def imprimirNombreColumnasGranM(archivo, nombresColumnas):
+    def imprimirNombreColumnas(archivo, nombresColumnas):
         lineaColumnas = "|\t|"
-        lineaInferior = "********"
-        lineaSuperior = "\n\n\n********"
+        lineaInferior = "*********"
+        lineaSuperior = "\n\n\n*********"
         for indice in nombresColumnas:
-            lineaSuperior = lineaSuperior + "*************"
-            lineaColumnas = lineaColumnas + indice + "\t     |"
-            lineaInferior = lineaInferior + "*************"
-        lineaInferior = lineaInferior + "****************"
-        lineaSuperior = lineaSuperior + "****************"
+            lineaSuperior = lineaSuperior + "****************"
+            lineaColumnas = lineaColumnas + indice + "\t\t|"
+            lineaInferior = lineaInferior + "****************"
         print(lineaSuperior + "\n" + lineaColumnas + "\n" + lineaInferior)
         archivo.write("\n" + lineaSuperior + "\n" + lineaColumnas + "\n" + lineaInferior + "\n")
 
@@ -58,19 +71,18 @@ class Imprimir:
     #Restricciones:
     #   Ninguna.
     def imprimirFuncionObjetivoGranM(archivo, nombresFilas, tabla):
-        lineaInferior = "********"
+        lineaInferior = "*********"
         lineaFuncionObjetivo = "|" + nombresFilas[0] + "\t|" #Imprime la letra U
         for valor in tabla[0]:
-            lineaInferior = lineaInferior + "*************"
+            lineaInferior = lineaInferior + "****************"
             valorM = round(valor.numeroM, 2) #Redondea a dos digitos el valor del numero que se suma / resta con M
             valorSinM = round(valor.numeroSinM, 2) #Redondea a dos digitos el valor del numero que esta multiplicado con M
             if valor.numeroM == 0: #Si la M es cero
-                lineaFuncionObjetivo = lineaFuncionObjetivo + str(valorSinM) + "\t     |" #Se imprime solo el valor sin M
+                lineaFuncionObjetivo = lineaFuncionObjetivo + str(valorSinM) + "\t\t|" #Se imprime solo el valor sin M
             elif valor.numeroM != 0 and valor.numeroSinM == 0: #Si la M no es cero, pero el valor sin M es cero
-                lineaFuncionObjetivo = lineaFuncionObjetivo + str(valorM) + "M\t     |" #Se imprime el valor M
+                lineaFuncionObjetivo = lineaFuncionObjetivo + str(valorM) + "M\t\t|" #Se imprime el valor M
             else: #Si ambos tienen valores
-                lineaFuncionObjetivo = lineaFuncionObjetivo + str(valorSinM) + "+" + str(valorM) + "M\t     |" #Se imprimen ambos
-        lineaInferior = lineaInferior + "****************"
+                lineaFuncionObjetivo = lineaFuncionObjetivo + str(valorSinM) + "+" + str(valorM) + "M\t|" #Se imprimen ambos
         print(lineaFuncionObjetivo + "\n" + lineaInferior)
         archivo.write(lineaFuncionObjetivo + "\n" + lineaInferior + "\n")
 
@@ -85,15 +97,39 @@ class Imprimir:
     #   Ninguna.
     def imprimirMatrizGranM(archivo, nombresFilas, nombresColumnas, tabla):
         if(len(tabla) is not 0): #Si la tabla no esta vacia
-            Imprimir.imprimirNombreColumnasGranM(archivo, nombresColumnas)
+            Imprimir.imprimirNombreColumnas(archivo, nombresColumnas)
             Imprimir.imprimirFuncionObjetivoGranM(archivo, nombresFilas, tabla)
             for filaTabla in tabla[1:len(tabla)]: #Lineas que no tienen funcion objetivo
-                lineaInferior = "********"
+                lineaInferior = "*********"
                 filaFinal = "|" + nombresFilas[tabla.index(filaTabla)] + "\t|" #Agrega el nombre de la fila a la fila a imprimir
                 for columnaTabla in filaTabla:
-                    lineaInferior = lineaInferior + "*************"
+                    lineaInferior = lineaInferior + "****************"
                     valor = round(columnaTabla, 2) #Redondea el valor a dos digitos
-                    filaFinal = filaFinal + str(valor) + "\t     |"
-                lineaInferior = lineaInferior + "****************"
+                    filaFinal = filaFinal + str(valor) + "\t\t|"
+                archivo.write(filaFinal + "\n" + lineaInferior + "\n")
+                print(filaFinal + "\n" + lineaInferior)
+
+
+
+#----------------------------------------------------------------------------------------------------------------------------------
+
+    #Funcion imprimirMatriz. Esta funcion se encarga de imprimir la funcion objetivo en el archivo para cada iteracion.
+    #Entradas:
+    #   estado: Iteracion por la que vamos
+    #   variableEntrante
+    #Salidas:
+    #   Imprime en el archivo la funcion objetivo para cada iteracion.
+    #Restricciones:
+    #   Ninguna.
+    def imprimirMatrizSimplex(archivo, nombresFilas, nombresColumnas, tabla):
+        if(len(tabla) is not 0): #Si la tabla no esta vacia
+            Imprimir.imprimirNombreColumnas(archivo, nombresColumnas)
+            for filaTabla in tabla[0:len(tabla)]: #Lineas que no tienen funcion objetivo
+                lineaInferior = "*********"
+                filaFinal = "|" + nombresFilas[tabla.index(filaTabla)] + "\t|" #Agrega el nombre de la fila a la fila a imprimir
+                for columnaTabla in filaTabla:
+                    lineaInferior = lineaInferior + "****************"
+                    valor = round(columnaTabla, 2) #Redondea el valor a dos digitos
+                    filaFinal = filaFinal + str(valor) + "\t\t|"
                 archivo.write(filaFinal + "\n" + lineaInferior + "\n")
                 print(filaFinal + "\n" + lineaInferior)

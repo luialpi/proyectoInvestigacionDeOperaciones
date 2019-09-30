@@ -6,7 +6,8 @@ class MetodoSimplex:
 	'''
 	simpexVar True para generar la matriz con variables
 	'''
-	def inicializarSimplex(self, simplexVar, matriz, esMaximo, variablesColumnas=None, variablesFilas=None):
+	def inicializarSimplex(self, simplexVar, matriz, esMaximo, archivo, variablesColumnas=None, variablesFilas=None):
+		self.archivo = archivo
 		if simplexVar == True:
 			self.tablaSimplex = self.agregarVariablesDeHolgura(matriz)
 			self.simularDespejeDeU()
@@ -24,9 +25,7 @@ class MetodoSimplex:
 		cantidadDeColumnas = len(self.tablaSimplex[0])
 		columnaPivot = -1
 		filaPivot = -1
-
 		while(self.optimo(cantidadDeColumnas)):
-
 			columnaPivot = self.encontrarColumnaPivot(cantidadDeColumnas)
 			filaPivotYDegenerada = self.encontrarFilaPivot(cantidadDeFilas,cantidadDeColumnas,columnaPivot)
 			filaPivot = filaPivotYDegenerada[0]
@@ -36,26 +35,24 @@ class MetodoSimplex:
 			if(filaPivot < 0):
 				print("solucion no acotada...")
 				return []
-				
 			self.modificarFilaPivot(cantidadDeColumnas,columnaPivot,filaPivot)
 			self.modificarFilas(cantidadDeFilas,cantidadDeColumnas,columnaPivot,filaPivot)
-		
 		return [self.tablaSimplex, self.variablesColumnas, self.variablesFilas]
-	
+
 	'''
 	Funcion encargada la columnaPivot
 	'''
 	def encontrarColumnaPivot(self,cantidadDeColumnas):
-		
-		pivot=self.tablaSimplex[0][0]
+		pivotMax=self.tablaSimplex[0][0]
+		pivotMin=self.tablaSimplex[0][0]
 		columna_pivot_indice_max=0
 		columna_pivot_indice_min=0
 		for x in range(cantidadDeColumnas-2):
-			if pivot > self.tablaSimplex[0][x] and self.tablaSimplex[0][x] < 0 :
-				pivot = (self.tablaSimplex[0][x])
+			if pivotMax > self.tablaSimplex[0][x] and self.tablaSimplex[0][x] < 0 :
+				pivotMax = (self.tablaSimplex[0][x])
 				columna_pivot_indice_max=x
-			if pivot < self.tablaSimplex[0][x] and self.tablaSimplex[0][x] > 0 :
-				pivot = (self.tablaSimplex[0][x])
+			if pivotMin < self.tablaSimplex[0][x] and self.tablaSimplex[0][x] > 0 :
+				pivotMin = (self.tablaSimplex[0][x])
 				columna_pivot_indice_min=x
 		return columna_pivot_indice_max if self.esMaximo else columna_pivot_indice_min
 
@@ -172,6 +169,7 @@ class MetodoSimplex:
 			nombresColumnas.append("x" + str(valor + 1))
 		for valor in range(cantidadResticciones):
 			nombresColumnas.append("S" + str(valor + 1))
+		nombresColumnas.append("RESULTADO")
 		return nombresColumnas
 
 	def generarVariablesParaFilas(self):
@@ -182,10 +180,9 @@ class MetodoSimplex:
 		return nombresFilas
 
 	def verificarDegenerada(self, arreglo):
-		seen = set()
-		uniq = [x for x in arreglo if x not in seen and not seen.add(x)] 
-		return len(uniq) < 0
+		visto = set()
+		unico = [x for x in arreglo if x not in visto and not visto.add(x)] 
+		return len(unico) < 0
 
 	##No factible: que uno de los valores finales no cumple con las restricciones iniciales
-
 ##fin
