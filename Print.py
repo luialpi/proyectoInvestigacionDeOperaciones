@@ -1,4 +1,4 @@
-#Impresion de la parte grafica
+ de la parte grafica
 #-----------------------------------------------------------
 #-----------------------------------------------------------
 
@@ -7,53 +7,68 @@ class Print:
     def __init__(self):
         pass
         
-    '''
-    Funcion en la cual se imprimen el nombre
-    correspondiente a cada una de las filas ya sea
-    var de holgura artificial o basica
-    '''
-    def imprime_Columnas(self,arregloCol,archivo):
-        
-        aux="\t"
-        aux2="\t"
-        for i in arregloCol:
-            aux+=i+"\t"
-            aux2+="------"
-        aux2+="------------"
-        print (aux+"\n"+aux2)
-        archivo.write(aux+"\n"+aux2+"\n")
+    #Funcion imprime_Columnas. Esta se va a usar dentro de la funcion imprimirMatriz para imprimir los nombres de las columnas 
+    #en el archivo para cada iteracion. 
+    #Entradas:
+    #   nombresColumnas: Variable global tipo lista de strings que va a contener los nombres de las columnas
+    #Salidas:
+    #   Imprime en el archivo los nombres de las columnas para cada iteracion.
+    #Restricciones:
+    #   Ninguna.
+    def imprime_Columnas(self, nombresColumnas, archivo):
+        lineaColumnas = "|\t|"
+        lineaInferior = "*********"
+        lineaSuperior = "\n\n\n*********"
+        for indice in nombresColumnas:
+            lineaSuperior = lineaSuperior + "****************"
+            lineaColumnas = lineaColumnas + indice + "\t\t|"
+            lineaInferior = lineaInferior + "****************"
+        archivo.write("\n" + lineaSuperior + "\n" + lineaColumnas + "\n" + lineaInferior + "\n")
 
-    '''
-    Como m corresponde a objetos se encarga de imprimir esta fila
-    por aparte imprimiendo numero M y numero Sin M
-    '''
-    def imprimeFilaU(self,tabla,arregloFilas,archivo):
 
-        aux=arregloFilas[0]+"\t"
-        for x in range (len(tabla[0])):
-            if tabla[0][x].numeroM == 0: aux+=str(tabla[0][x].numeroSinM)+"\t"
-            elif tabla[0][x].numeroM != 0 and tabla[0][x].numeroSinM == 0:
-                aux+=str(tabla[0][x].numeroM)+"M\t"
-            else: aux+=str(tabla[0][x].numeroSinM)+"+"+str(tabla[0][x].numeroM)+"M\t"
-        print (aux)
-        archivo.write(aux+"\n")
+    #Funcion imprimeFilaU. Esta funcion se encarga de imprimir la funcion objetivo en el archivo para cada iteracion.
+    #Entradas:
+    #   nombresFilas: Variable global tipo lista de strings que contiene los nombres de las filas.
+    #   tabla: Variable de tipo lista de listas de Float, que contiene la tabla de cada iteracion.
+    #Salidas:
+    #   Imprime en el archivo la funcion objetivo para cada iteracion.
+    #Restricciones:
+    #   Ninguna.
+    def imprimeFilaU(self, tabla, nombresFilas, archivo):
+        lineaInferior = "*********"
+        lineaFuncionObjetivo = "|" + nombresFilas[0] + "\t|" #Imprime la letra U
+        for valor in tabla[0]:
+            lineaInferior = lineaInferior + "****************"
+            valorM = round(valor.numeroM, 2) #Redondea a dos digitos el valor del numero que se suma / resta con M
+            valorSinM = round(valor.numeroSinM, 2) #Redondea a dos digitos el valor del numero que esta multiplicado con M
+            if valor.numeroM == 0: #Si la M es cero
+                lineaFuncionObjetivo = lineaFuncionObjetivo + str(valorSinM) + "\t\t|" #Se imprime solo el valor sin M
+            elif valor.numeroM != 0 and valor.numeroSinM == 0: #Si la M no es cero, pero el valor sin M es cero
+                lineaFuncionObjetivo = lineaFuncionObjetivo + str(valorM) + "M\t\t|" #Se imprime el valor M
+            else: #Si ambos tienen valores
+                lineaFuncionObjetivo = lineaFuncionObjetivo + str(valorSinM) + "+" + str(valorM) + "M\t|" #Se imprimen ambos
+        archivo.write(lineaFuncionObjetivo + "\n" + lineaInferior + "\n")
     
-    '''
-    Funcion encargada de imprimir la primer matriz
-    una vez se encuentre estandarizada
-    '''
-    def imprime_Matriz(self,tabla,arregloFilas,arregloCol,archivo):
-
-       if(len(tabla) is not 0):
-          aux=""
-          self.imprime_Columnas(arregloCol,archivo)
-          self.imprimeFilaU(tabla,arregloFilas,archivo)
-          for i in range (1,len(tabla)):
-              aux=arregloFilas[i]+"\t"
-              for j in range (len(tabla[i])):
-                  aux+=str(tabla[i][j])+"\t"
-              archivo.write(aux+"\n")
-              print(aux)
+    #Funcion imprimirMatriz. Esta funcion se encarga de imprimir la funcion objetivo en el archivo para cada iteracion.
+    #Entradas:
+    #   nombresFilas: Variable global tipo lista de strings que contiene los nombres de las filas.
+    #   tabla: Variable de tipo lista de listas de Float, que contiene la tabla de cada iteracion.
+    #Salidas:
+    #   Imprime en el archivo la funcion objetivo para cada iteracion.
+    #Restricciones:
+    #   Ninguna.
+    def imprimirMatrizGranM(self, tabla, nombresFilas, nombresColumnas, archivo):
+        if(len(tabla) is not 0): #Si la tabla no esta vacia
+            Print.imprime_Columnas(nombresColumnas, archivo)
+            Print.imprimeFilaU(tabla, nombresFilas, archivo)
+            for filaTabla in tabla[1:len(tabla)]: #Lineas que no tienen funcion objetivo
+                lineaInferior = "*********"
+                filaFinal = "|" + nombresFilas[tabla.index(filaTabla)] + "\t|" #Agrega el nombre de la fila a la fila a imprimir
+                for columnaTabla in filaTabla:
+                    lineaInferior = lineaInferior + "****************"
+                    valor = round(columnaTabla, 2) #Redondea el valor a dos digitos
+                    filaFinal = filaFinal + str(valor) + "\t\t|"
+                archivo.write(filaFinal + "\n" + lineaInferior + "\n")
 
 #-----------------------------------------------------------
 #-----------------------------------------------------------
@@ -153,14 +168,24 @@ class Archivo:
     almacenara las iteraciones'''
     
     def __init__(self,nombre):
-        self.archivo=open(nombre,"w+")
-        print(nombre)
+        nombreArchivoSalida = nombre.replace(".txt", "") + "_sol.txt"
+        archivo = open (nombreArchivoSalida, "w+")
 
     def getArchivo(self):
         return self.archivo
+
+class ArchivoSalida:
+
+    def __init__(self):
+        pass
+
+    def crearArchivoSalida(nombreArchivoEntrada):
+        nombreArchivoSalida = nombreArchivoEntrada.replace(".txt", "") + "_sol.txt"
+        archivo = open (nombreArchivoSalida, "w+")
+        return archivo
+
+    def cerrarArchivoSalida(archivo):
+        archivo.close()
 #-----------------------------------------------------------
 #-----------------------------------------------------------
-              
-
-
 
