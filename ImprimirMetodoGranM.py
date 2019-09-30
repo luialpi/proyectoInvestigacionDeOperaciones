@@ -1,9 +1,4 @@
- de la parte grafica
-#-----------------------------------------------------------
-#-----------------------------------------------------------
-
-class Print:
-    #Constructor
+class ImprimirMetodoGranM:
     def __init__(self):
         pass
         
@@ -58,9 +53,10 @@ class Print:
     #Restricciones:
     #   Ninguna.
     def imprimirMatrizGranM(self, tabla, nombresFilas, nombresColumnas, archivo):
+        ImprimirMetodoGranM_Aux = ImprimirMetodoGranM()
         if(len(tabla) is not 0): #Si la tabla no esta vacia
-            Print.imprime_Columnas(nombresColumnas, archivo)
-            Print.imprimeFilaU(tabla, nombresFilas, archivo)
+            ImprimirMetodoGranM_Aux.imprime_Columnas(nombresColumnas, archivo)
+            ImprimirMetodoGranM_Aux.imprimeFilaU(tabla, nombresFilas, archivo)
             for filaTabla in tabla[1:len(tabla)]: #Lineas que no tienen funcion objetivo
                 lineaInferior = "*********"
                 filaFinal = "|" + nombresFilas[tabla.index(filaTabla)] + "\t|" #Agrega el nombre de la fila a la fila a imprimir
@@ -70,8 +66,7 @@ class Print:
                     filaFinal = filaFinal + str(valor) + "\t\t|"
                 archivo.write(filaFinal + "\n" + lineaInferior + "\n")
 
-#-----------------------------------------------------------
-#-----------------------------------------------------------
+
 
 class Solucion:
     '''Impresion del resultado final'''
@@ -89,16 +84,15 @@ class Solucion:
     def mostrarSolucion(self,tabla,arregloFilas,arregloCol,archivo):
         self.lista.append("U")
         self.agregarM(tabla)
-        #self.lista2.append(str(round(tabla[0][len(tabla[0])-2].numeroM,2)) +"M + "+str(round(tabla[0][len(tabla[0])-2].numeroSinM,2)))
         for i in range(1, len(arregloFilas)):
             self.lista.append(arregloFilas[i])
             
             self.lista2.append(tabla[i][len(tabla[i])-2])
         
         self.colocar_Variables(arregloCol)
-        self.imprimirVar(archivo)
+        self.imprimirVariables(archivo)
         
-    def colocar_Variables(self,arregloCol): # coloca las variables que no son las basicas en la lista para luego imprimirlas
+    def colocar_Variables(self,arregloCol): 
         for i in range(0,len(arregloCol)-2):
             
             if arregloCol[i] in self.lista:
@@ -108,7 +102,7 @@ class Solucion:
                 self.lista2.append(0)
 
 
-    def agregarM(self,tabla): # agrega M debido a que es un objeto por lo tano se debe tratar como objeto.numero M y objeto.numeroSin M
+    def agregarM(self,tabla): 
         if round(tabla[0][len(tabla[0])-2].numeroM,2) ==0:
             self.lista2.append(str(round(tabla[0][len(tabla[0])-2].numeroSinM,2)))
         else:self.lista2.append(str(round(tabla[0][len(tabla[0])-2].numeroM,2)) +"M + "+str(round(tabla[0][len(tabla[0])-2].numeroSinM,2)))
@@ -118,20 +112,18 @@ class Solucion:
     la forma U = 332(x1:0,..)
 
     '''            
-    def imprimirVar(self,archivo):
-        print("\n\n-----------------------------------------------------------------\n  ")
+    def imprimirVariables(self,archivo):
         archivo.write("\n\n-----------------------------------------------------------------\n ")
-        aux="->Respuesta Final: U= "+ str(self.lista2[0])+"("+ str(self.lista[1]) +": "+ str(round(self.lista2[1],2))
+        aux="-> U= "+ str(self.lista2[0])+"("+ str(self.lista[1]) +": "+ str(round(self.lista2[1],2))
         for i in range(2,len(self.lista)):
             aux+=","+str(self.lista[i]) +": "+ str(round(self.lista2[i],2))
+        print("\n\n-----------------Metodo de la Gran M--------------------------\n  ")
         print(aux+" )")
-        archivo.write(aux+" )\n") # lo escribe al archivo 
+        print("\n-----------------------------------------------------------------\n  ")
+        archivo.write(aux+" )\n")
             
                            
-                
-    #-----------------------------------------------------------
-    #-----------------------------------------------------------
-
+   
 class Multiples_Solucion:
     '''
     Clase en la cual se verifica si el resultado final cuenta con 
@@ -141,7 +133,7 @@ class Multiples_Solucion:
     def __init__(self):
         self.listaPosiciones=[]
         
-    def localizar_VB(self, tabla,arregloFilas,arregloCol):
+    def localizar_Variable_Basica(self, tabla,arregloFilas,arregloCol):
         for i in range(1,len(arregloFilas)):
             self.listaPosiciones.append(arregloCol.index(arregloFilas[i]))
         
@@ -160,8 +152,7 @@ class Multiples_Solucion:
                 if tabla[0][i].numeroM == 0 and tabla[0][i].numeroSinM == 0:
                     return i
         return -1
-#-----------------------------------------------------------
-#-----------------------------------------------------------
+
               
 class Archivo:
     '''Encagada de crear archivo donde se 
@@ -169,7 +160,7 @@ class Archivo:
     
     def __init__(self,nombre):
         nombreArchivoSalida = nombre.replace(".txt", "") + "_sol.txt"
-        archivo = open (nombreArchivoSalida, "w+")
+        self.archivo = open(nombreArchivoSalida,"w+")
 
     def getArchivo(self):
         return self.archivo
@@ -186,6 +177,4 @@ class ArchivoSalida:
 
     def cerrarArchivoSalida(archivo):
         archivo.close()
-#-----------------------------------------------------------
-#-----------------------------------------------------------
 

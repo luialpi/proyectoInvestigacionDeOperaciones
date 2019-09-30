@@ -1,12 +1,13 @@
-from GranM import*
+from MetodoGranM import*
+from ImprimirMetodoGranM import*
+
 tabla=[[]]
 variablesDecision=0
-arregloCol=[]#ubicar en tabla u
+arregloColumnas=[]
 arregloFilas=["Z"]
 arregloZ=[]
-#-----------------------------------------------------------
-class Z_Aux:
-    #Constructor
+
+class ArregloZ_Aumentado_Aux:
     '''
     Clase en la cual se cuenta con un constructor encargado de 
     crear un objeto el cual tiene como atributo numero M
@@ -18,10 +19,9 @@ class Z_Aux:
         self.numeroM= numeroM
         self.numeroSinM=numeroSinM
         self.letra=letra 
-#-----------------------------------------------------------
-#crear Z
-class Z:
-    #Constructor
+
+class ArregloZ_Aumentado:
+   
     '''
     Clase la cual recibe como parametro si se trata de minimizar o 
     maximizar, ademas de una lista de lista en la cual se encuentran
@@ -29,9 +29,9 @@ class Z:
     corresponden a float o int y el simbolo es un string
 
     '''
-    def __init__(self,arreglo,esMin,u):
+    def __init__(self,restricciones,esMin,u):
         self.esMin= esMin
-        self.restricciones=arreglo
+        self.restricciones=restricciones
         self.u= u
 
 
@@ -43,14 +43,14 @@ class Z:
     Ademas se agrega la solucion identificada mediante
     SOL
     '''    
-    def crearZ(self):
+    def crearZ_Aumentada(self):
         global tabla
         self.convertirNulo_ObjetosU()
         for i in range(len(self.u)):
             global arregloZ
-            z=Z_Aux(0,self.u[i],"x"+str(i+1))
+            z=ArregloZ_Aumentado_Aux(0,self.u[i],"x"+str(i+1))
             arregloZ.append(z)
-        sol=Z_Aux(0,0,"SOL")
+        sol=ArregloZ_Aumentado_Aux(0,0,"SOL")
         arregloZ.append(sol)
 
 
@@ -67,23 +67,14 @@ class Z:
                 return x
         return -1
 
-     
-    ''' 
-    Funcion para imprimimir los valores ya como objetos
-    esto solamente es para la fila 0 es decir la fila z
-    '''   
     
-    #def imprimeArregloZ(self):
-        #global arregloZ
-        #for x in range(len(arregloZ)):
-            #print("M:"+str(arregloZ[x].numeroM) +"\t Sin M:"+str(arregloZ[x].numeroSinM)+ "\t Letra:"+arregloZ[x].letra) 
     '''
     Funcion que verifica si se trata de minimizar o 
     maximizar , en caso de que sea minimizar cambiara de
     signo al numero debido al despeje que se debe hacer
     al colocar Z
+
     '''
-    
     def verificarMinX(self,numero):
         if self.esMin is True:
             return numero*-1
@@ -99,18 +90,16 @@ class Z:
         for i in range (len(self.restricciones)):
      
              if self.restricciones[i][len(self.restricciones[i])-1]!= "<=":
-                 for j in range(len(self.restricciones[i])-2): ## por que los dos ultimos son solucion y simbolo
-                     if self.buscarArreglo("x"+str(j+1)) != -1: # si lo encontro devuelve la pos donde esta si no -1
-                         numero = self.verificarMinX(self.restricciones[i][j])# si es minimizar lo deja igual
+                 for j in range(len(self.restricciones[i])-2): 
+                     if self.buscarArreglo("x"+str(j+1)) != -1:
+                         numero = self.verificarMinX(self.restricciones[i][j])
                          arregloZ[self.buscarArreglo("x"+str(j+1))].numeroM+=numero
 
-                 numero = self.verificarMinX(self.restricciones[i][len(self.restricciones[i])-2])# si es minimizar lo multiplica*-1
+                 numero = self.verificarMinX(self.restricciones[i][len(self.restricciones[i])-2])
                  x=self.buscarArreglo("SOL")
                  arregloZ[x].numeroM+=numero
                  
         self.cambiarSignos()
-        #self.imprimeArregloZ() # verifica si esta imprimiendo bien M
-
 
     '''
     Funcioon en la cual lo que se hace es cambiar
@@ -129,9 +118,9 @@ class Z:
     el elemento de la fila U
     '''
     def ubicar_En_Tabla(self,elemento):
-        global arregloCol
-        for x in range(len(arregloCol)):
-            if elemento.letra == arregloCol[x]:
+        global arregloColumnas
+        for x in range(len(arregloColumnas)):
+            if elemento.letra == arregloColumnas[x]:
                 return x
         return -1         
 
@@ -142,24 +131,21 @@ class Z:
     y numero sin M corresponde a 0 0
     '''
     def convertirNulo_ObjetosU(self):
-        for x in range(len(arregloCol)):
-            z=Z_Aux(0,0,arregloCol[x])
+        for x in range(len(arregloColumnas)):
+            z=ArregloZ_Aumentado_Aux(0,0,arregloColumnas[x])
             tabla[0][x]=z
        
-
-#-------------------------------------------------------
-#Matriz      
+    
 class Matriz:
-    #Constructor
     def __init__(self, arreglo):
         self.matriz = arreglo
        
    
-    def set_Matriz(self, valor):  #set matriz  
-        #print("Matriz cambiada")
+    def set_Matriz(self, valor): 
+        print("Matriz cambiada")
         self.matriz = valor
 
-    def get_Matriz(self): #get de la matriz 
+    def get_Matriz(self): 
         return self.matriz
 
     '''
@@ -174,29 +160,23 @@ class Matriz:
     def cantidad_filas(self):
         if(len(self.matriz) is not 0):
            global variablesDecision, tabla
-           filas=variablesDecision+2 # col solucion y col division
+           filas=variablesDecision+2 
            for i in range (len(self.matriz)):
                indica = self.matriz[i][len(self.matriz[i])-1]
                filas+=self.cantidad_filasAux(indica)
         tabla=[[0 for i in range(filas)] for i in range(len(self.matriz)+1)]
 
-    def cantidad_filasAux(self,argument): # verifica si va necesitar el espacio para R y -S
+    def cantidad_filasAux(self,argument): 
         switcher = {">=": 2}
         return switcher.get(argument, 1)
 
     def variablesX(self):
         global variablesDecision
         for i in range (0,variablesDecision):
-            arregloCol.append("x"+str(i+1))
+            arregloColumnas.append("x"+str(i+1))
         
-
-
-#-----------------------------------------------------------
-#Restricciones
-
 class Restricciones:
-    #Constructor
-    def __init__(self, arreglo,esMin):
+    def __init__(self,arreglo,esMin):
         self.matriz = arreglo
         self.varR=1
         self.varS=1
@@ -207,7 +187,7 @@ class Restricciones:
     '''   
     def colocar_Restricciones(self):
         global variablesDecision
-        posicion = variablesDecision-1  # aumenta en R y S
+        posicion = variablesDecision-1 
         
         for i in range(len(self.matriz)):
             for j in range(len(self.matriz[i])-2):
@@ -227,8 +207,8 @@ class Restricciones:
         que corresponden a la solucin y a una
         para la division
         '''    
-        arregloCol.append("SOL")
-        arregloCol.append("DIV")
+        arregloColumnas.append("SOL")
+        arregloColumnas.append("DIV")
     '''
     Funcion en la cual se agrega al arreglo que muestra las filas
     y las columnas una R representando variable artificial
@@ -236,16 +216,16 @@ class Restricciones:
     Se le adiciona el nuemero para poder diferenciarlas
     '''   
     def MayorIgual(self):
-        arregloCol.append("R"+str(self.varR))
-        arregloCol.append("S"+str(self.varS))
+        arregloColumnas.append("R"+str(self.varR))
+        arregloColumnas.append("S"+str(self.varS))
         arregloFilas.append("R"+str(self.varR))
-        z=Z_Aux(self.verificar_Min(self.esMin),0,"S"+str(self.varS))
+        z=ArregloZ_Aumentado_Aux(self.verificar_Min(self.esMin),0,"S"+str(self.varS))
         global arregloZ
         arregloZ.append(z)
         self.varR+=1
         self.varS+=1
         
-    def verificar_Min(self,argument):#verifica que se trate de minimizar o maximizar 
+    def verificar_Min(self,argument):
         switcher = {True: 1}
         return switcher.get(argument, -1)
             
@@ -255,7 +235,7 @@ class Restricciones:
     de columnas , es cuando se recibe un signo <=
     '''
     def MenorIgual(self):
-        arregloCol.append("S"+str(self.varS))
+        arregloColumnas.append("S"+str(self.varS))
         arregloFilas.append("S"+str(self.varS))
         self.varS+=1
 
@@ -266,61 +246,51 @@ class Restricciones:
     al arreglo de filas y columnas
     '''
     def Igual(self):
-        arregloCol.append("R"+str(self.varR))
+        arregloColumnas.append("R"+str(self.varR))
         arregloFilas.append("R"+str(self.varR))
         self.varR+=1    
  
-    def verificar_Signo(self,signo): # verifica cual signo corresponde a la restriccion
+    def verificar_Signo(self,signo): 
         switcher = {">=": self.MayorIgual,"<=": self.MenorIgual, "=": self.Igual }
         switcher [signo]()
         
-
-#------------------------------------------------------------          
+         
 class Controlador:
     '''
     Metodo main en donde se llaman a las funciones para
     la implementacion metodo M """
       
     '''
-    def __init__(self,minimo,U,restricciones,vars,file):
+    def __init__(self,minimo,U,restricciones,vars):
         global variablesDecision
-
-        self.archivo=file
-           
+                   
         variablesDecision=vars
-        self.esMinimizar= minimo# se recibe
+        self.esMinimizar= minimo
         self.arregloZ=U
-        self.arregloEntrada=restricciones # lo que entra OJO CAMBIAR***************$$$$$
-        #------------**------------------------**------------------
+        self.arregloEntrada=restricciones
+        
     '''
     Funcion en la cual se controla la creacion del areglo con objetos
     pertenecientes a la fila U, ademas se crea la tabla en la cual 
     de forma estandarizada
     '''
-    def inicioControlador(self):    
-        #print("-> Representacion de la impresion: \n ---------------------- \n |* R = Var Artificial   | \n |* S = Var Holgura      | \n |* X = Var Decision     | \n ----------------------\n\n")
-        self.archivo.write("-> Representacion de la impresion: \n ---------------------- \n |* R = Var Artificial   | \n |* S = Var Holgura      | \n |* X = Var Decision     | \n ----------------------\n\n")
+    def inicioControlador(self):
+        
+        crearArchivo=Archivo("MetodoGranM")
+        archivo = crearArchivo.getArchivo()
 
-
-        matriz = Matriz(self.arregloEntrada) # crea objeto para la impresion
-        #matriz.imprime_Matriz(matriz.get_Matriz())
-        matriz.cantidad_filas() # crea la tabla
+        matriz = Matriz(self.arregloEntrada)
+        
+        matriz.cantidad_filas()
         matriz.variablesX()
+        
         restricciones=Restricciones(self.arregloEntrada,self.esMinimizar)
         restricciones.colocar_Restricciones()
-        #
-        z=Z(self.arregloEntrada,self.esMinimizar,self.arregloZ)
-        z.crearZ()
-        z.agregarRestricciones()
-      #-----
-        global arregloFilas,arregloCol,tabla
-        gM=GranM(tabla,arregloFilas,arregloCol,self.esMinimizar,self.archivo)
-        gM.start_MetodoM_Max()
         
+        z=ArregloZ_Aumentado(self.arregloEntrada,self.esMinimizar,self.arregloZ)
+        z.crearZ_Aumentada()
+        z.agregarRestricciones()
   
-    #tabla de forma estandar OK
-   
-    #print(arregloEntrada)
-#-------------------------------------------------------------
-#-------------------------------------------------------------
-
+        global arregloFilas,arregloColumnas,tabla
+        granM=GranM(tabla,arregloFilas,arregloColumnas,self.esMinimizar,archivo)
+        granM.Inicio_Metodo_GranM()
