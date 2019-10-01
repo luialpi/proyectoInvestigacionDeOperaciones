@@ -3,12 +3,10 @@ import sys
 from VerificarArchivoEntrada import *
 from Imprimir import *
 from metodoSimplex import *
-import metodoDual
-from Print import *
+from metodoDual import*
+from ControladorMetodoGranM import *
 
 def main():
-    #Se crea objeto simplex inicial que sera usado para calculos futuros. 
-    simplex = MetodoSimplex()
     #Aqui leemos los argumentos de entrada de la funcion.
     for indice in range (1, len(sys.argv)):
         if sys.argv[indice] in ["-h", "[-h]"]:
@@ -47,15 +45,22 @@ def main():
 
                 #Se corre el tipo de metodo dependiendo de la entrada.
                 if configuracion[0] == 0:
+                    simplex = MetodoSimplex()
                     simplex.inicializarSimplex(True, configuracion[1][0], configuracion[1][1], archivo)
                     solucionSimplex = simplex.mainSimplex()
 
                     #Imprimir.imprimirMatrizSimplex(archivo, solucionSimplex[2], solucionSimplex[1], solucionSimplex[0])
 
                 elif configuracion[0] == 1:
-                    #----------------FALTA----------------
-                    return "granM"
-                    
+                    arregloU = configuracion[1][2]
+                    funcionObjetivo = []
+                    for i in range(0,len(arregloU)-2):
+                        funcionObjetivo.append(arregloU[i])
+                  
+                    granM = Controlador(configuracion[1][3],funcionObjetivo,configuracion[1][1],int(configuracion[1][0]),archivo)
+                    granM.inicioControlador()
+                    float
+
                 elif configuracion[0] == 2:
                     #----------------FALTA----------------
                     return "dosFases"
