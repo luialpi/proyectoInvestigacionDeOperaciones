@@ -9,13 +9,16 @@ class MetodoSimplex:
 	def inicializarSimplex(self, simplexVar, matriz, esMaximo, archivo, variablesColumnas=None, variablesFilas=None):
 		self.archivo = archivo
 		if simplexVar == True:
-			self.tablaSimplex = self.agregarVariablesDeHolgura(matriz)
+			tablaResultado = self.agregarVariablesSegunInecuacion(matriz)
+			self.tablaSimplex = tablaResultado[0]
 			self.simularDespejeDeU()
 		else:
 			self.tablaSimplex = matriz
+
 		self.esMaximo = esMaximo
-		self.variablesColumnas = variablesColumnas if variablesColumnas != None else self.generarVariablesParaColumnas()
-		self.variablesFilas = variablesFilas if variablesFilas != None else self.generarVariablesParaFilas()
+		self.variablesColumnas = variablesColumnas if variablesColumnas != None else tablaResultado[1]
+		self.variablesFilas = variablesFilas if variablesFilas != None else tablaResultado[2]
+		print([self.tablaSimplex,self.variablesColumnas,self.variablesFilas])
 
 	'''
 	funcion principal del metodo simplex
@@ -31,9 +34,9 @@ class MetodoSimplex:
 			filaPivot = filaPivotYDegenerada[0]
 			self.intercambiarVariableEntrante(columnaPivot,filaPivot)
 			if(self.verificarDegenerada(filaPivotYDegenerada[1])):
-				print("solucion degenerada...")
+				archivo.write("La solucion de este archivo es degenerada.")
 			if(filaPivot < 0):
-				print("solucion no acotada...")
+				print("La solucion de este archivo es no acotada.")
 				return []
 			self.modificarFilaPivot(cantidadDeColumnas,columnaPivot,filaPivot)
 			self.modificarFilas(cantidadDeFilas,cantidadDeColumnas,columnaPivot,filaPivot)
@@ -140,44 +143,57 @@ class MetodoSimplex:
 		for i in range(0,len(self.tablaSimplex[0])-2):
 			numero =  self.tablaSimplex[0][i]
 			variable = self.variablesColumnas[i]
-			print(variable, numero)
 			if variable not in self.variablesFilas and numero == 0:
 				return i
 		return -1
 
-	def agregarVariablesDeHolgura(self, matriz):
-		numeroDeVariables = len(matriz) -1
-		iteraccion = 0
-		for i in range(0, len(matriz)):
-			matriz[i] = matriz[i][:-1]
-			for n in range(0, numeroDeVariables):
-				if i == 0:
-					matriz[i].insert(len(matriz[i])-1,0)
-				else:
-					matriz[i].insert(len(matriz[i])-1,1) if i == n+1 else matriz[i].insert(len(matriz[i])-1,0)
-		return matriz
+	def agregarVariablesSegunInecuacion(self, tablaSimplex):
+		nombresFilas = ['U']
+		nombresColumnas=self.agregarVariablesNoBasicas(tablaSimplex)
+		tabla=[]
+		inecuaciones = []
+		boleano = False
+		totalDeArtificiales = 1
+		totalDeExceso = 1
+		for fila in tablaSimplex:
+			inecuaciones.append((fila[-1:])[0])
+			tabla.append(fila[:-1])
+		for n in range(1,len(inecuaciones)):
+			if(inecuaciones[n] == '>='):
+				self.agregarVariable(n,tabla,-1);
+				nombresColumnas.append("S" + str(totalDeArtificiales))
+				nombresColumnas.append("R" + str(totalDeArtificiales))
+				nombresFilas.append("R" + str(totalDeArtificiales))
+				totalDeArtificiales+=1
+			if(inecuaciones[n] == '<='):
+				nombresColumnas.append("S" + str(totalDeExceso))
+				nombresFilas.append("S" + str(totalDeExceso))
+				totalDeExceso+=1
+			if(inecuaciones[n] == '='):
+				nombresColumnas.append("R" + str(totalDeArtificiales))
+				nombresFilas.append("R" + str(totalDeArtificiales))
+				totalDeArtificiales+=1
+			self.agregarVariable(n,tabla,1);
+		nombresColumnas.append("RESULTADO")
+		return [tabla,nombresColumnas,nombresFilas]
+
+	def agregarVariable(self, n, tabla, valor):
+		tablaResultado=tabla
+		for i in range(len(tabla)):
+			tablaResultado[i].insert(len(tablaResultado[i])-1,valor) if i == n else tablaResultado[i].insert(len(tablaResultado[i])-1,0)
+
 
 	def simularDespejeDeU(self):
 		for i in range( 0, len( self.tablaSimplex[0] ) -1 ):
 			self.tablaSimplex[0][i]*=-1
  		
-	def generarVariablesParaColumnas(self):
-		cantidadResticciones = len(self.tablaSimplex)-1
-		cantidadDeVariables = len(self.tablaSimplex[0])-(cantidadResticciones+1)
+	def agregarVariablesNoBasicas(self, tabla):
+		cantidadDeVariables = len(tabla)-1
 		nombresColumnas=[]
 		for valor in range(cantidadDeVariables):
 			nombresColumnas.append("x" + str(valor + 1))
-		for valor in range(cantidadResticciones):
-			nombresColumnas.append("S" + str(valor + 1))
-		nombresColumnas.append("RESULTADO")
 		return nombresColumnas
 
-	def generarVariablesParaFilas(self):
-		cantidadResticciones = len(self.tablaSimplex)-1
-		nombresFilas = ['U']
-		for valor in range(cantidadResticciones):
-			nombresFilas.append("S" + str(valor + 1))
-		return nombresFilas
 
 	def verificarDegenerada(self, arreglo):
 		visto = set()
@@ -186,3 +202,7 @@ class MetodoSimplex:
 
 	##No factible: que uno de los valores finales no cumple con las restricciones iniciales
 ##fin
+
+x = MetodoSimplex()
+x.inicializarSimplex(True,[[1, -2, 1,0, '='], [1.0, 1.0, 1.0, 12.0, '<='], [2.0, 1.0, -1.0, 6.0, '<='], [-1.0, 3.0, 1, 9.0, '<=']],True,"")
+print(x.mainSimplex())
