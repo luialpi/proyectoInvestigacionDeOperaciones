@@ -261,9 +261,10 @@ class Controlador:
     la implementacion metodo M """
       
     '''
-    def __init__(self,minimo,U,restricciones,vars):
+    def __init__(self,minimo,U,restricciones,vars,archivo):
         global variablesDecision
-                   
+
+        self.archivo=archivo           
         variablesDecision=vars
         self.esMinimizar= minimo
         self.arregloZ=U
@@ -276,11 +277,7 @@ class Controlador:
     '''
     def inicioControlador(self):
         
-        crearArchivo=Archivo("MetodoGranM")
-        archivo = crearArchivo.getArchivo()
-
         matriz = Matriz(self.arregloEntrada)
-        
         matriz.cantidad_filas()
         matriz.variablesX()
         
@@ -292,5 +289,5 @@ class Controlador:
         z.agregarRestricciones()
   
         global arregloFilas,arregloColumnas,tabla
-        granM=GranM(tabla,arregloFilas,arregloColumnas,self.esMinimizar,archivo)
+        granM=GranM(tabla,arregloFilas,arregloColumnas,self.esMinimizar,self.archivo,restricciones)
         granM.Inicio_Metodo_GranM()

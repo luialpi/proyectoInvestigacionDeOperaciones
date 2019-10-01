@@ -81,7 +81,7 @@ class Solucion:
     son las basicas para luego mostrar la solucion
     de la forma U (x1 =0,...)
     '''
-    def mostrarSolucion(self,tabla,arregloFilas,arregloCol,archivo):
+    def mostrarSolucion(self,tabla,arregloFilas,arregloCol,archivo,restricciones):
         self.lista.append("U")
         self.agregarM(tabla)
         for i in range(1, len(arregloFilas)):
@@ -90,7 +90,7 @@ class Solucion:
             self.lista2.append(tabla[i][len(tabla[i])-2])
         
         self.colocar_Variables(arregloCol)
-        self.imprimirVariables(archivo)
+        self.imprimirVariables(archivo,restricciones)
         
     def colocar_Variables(self,arregloCol): 
         for i in range(0,len(arregloCol)-2):
@@ -112,7 +112,8 @@ class Solucion:
     la forma U = 332(x1:0,..)
 
     '''            
-    def imprimirVariables(self,archivo):
+    def imprimirVariables(self,archivo,restricciones):
+        Solucion_Aux = Solucion()
         archivo.write("\n\n-----------------------------------------------------------------\n ")
         aux="-> U= "+ str(self.lista2[0])+"("+ str(self.lista[1]) +": "+ str(round(self.lista2[1],2))
         for i in range(2,len(self.lista)):
@@ -121,8 +122,40 @@ class Solucion:
         print(aux+" )")
         print("\n-----------------------------------------------------------------\n  ")
         archivo.write(aux+" )\n")
-            
-                           
+        Solucion_Aux.validarSolucionFactible(archivo,self.lista2,self.lista,restricciones)
+
+    def validarSolucionFactible(self,archivo,lista2,lista,restricciones):
+        Solucion_Aux = Solucion()
+        resultado = 0
+        cantidad_Restricciones = len(restricciones.matriz)
+        for i in range(0,len(restricciones.matriz)):
+            for j in range(0,len(restricciones.matriz[i])-2):
+               indice = Solucion_Aux.encontrarCampoLista(lista,"x"+ str(j+1))
+               resultado += restricciones.matriz[i][j]*lista2[indice]
+
+            if (restricciones.matriz[i][len(restricciones.matriz[i])-1])== "=":
+                if resultado != (restricciones.matriz[i][len(restricciones.matriz[i])-2]):
+                    print("La solucion al problema no es factible ya que incumple con la restriccion:"+str(i+1))
+                    archivo.write("\n\nLa solucion al problema no es factible ya que incumple con la restriccion:"+str(i+1)+"\n")
+                    
+            if (restricciones.matriz[i][len(restricciones.matriz[i])-1])== "<=":
+                if resultado > (restricciones.matriz[i][len(restricciones.matriz[i])-2]):
+                    print("La solucion al problema no es factible ya que incumple con la restriccion:"+str(i+1))
+                    archivo.write("\n\nLa solucion al problema no es factible ya que incumple con la restriccion:"+str(i+1)+"\n")
+
+            else:
+               if resultado < (restricciones.matriz[i][len(restricciones.matriz[i])-2]):
+                    print("La solucion al problema no es factible ya que incumple con la restriccion:"+str(i+1))
+                    archivo.write("\n\nLa solucion al problema no es factible ya que incumple con la restriccion:"+str(i+1)+"\n")
+                    
+            resultado = 0
+        print("La solucion al problema es factible ya que cumple con las restricciones iniciales")
+        archivo.write("\n\nLa solucion al problema es factible ya que cumple con las restricciones iniciales\n")
+           
+    def encontrarCampoLista(self,lista,signo):
+        for i in range(0,len(lista)):
+            if (lista[i]) == signo:
+                return i
    
 class Multiples_Solucion:
     '''
