@@ -18,7 +18,7 @@ class MetodoSimplex:
 		self.esMaximo = esMaximo
 		self.variablesColumnas = variablesColumnas if variablesColumnas != None else tablaResultado[1]
 		self.variablesFilas = variablesFilas if variablesFilas != None else tablaResultado[2]
-		print([self.tablaSimplex,self.variablesColumnas,self.variablesFilas])
+		return[self.tablaSimplex,self.variablesColumnas,self.variablesFilas]
 
 	'''
 	funcion principal del metodo simplex
@@ -202,7 +202,3 @@ class MetodoSimplex:
 
 	##No factible: que uno de los valores finales no cumple con las restricciones iniciales
 ##fin
-
-x = MetodoSimplex()
-x.inicializarSimplex(True,[[1, -2, 1,0, '='], [1.0, 1.0, 1.0, 12.0, '<='], [2.0, 1.0, -1.0, 6.0, '<='], [-1.0, 3.0, 1, 9.0, '<=']],True,"")
-print(x.mainSimplex())
