@@ -3,6 +3,7 @@ import sys
 from VerificarArchivoEntrada import *
 from Imprimir import *
 from metodoSimplex import *
+from DosFases import *
 from metodoDual import*
 from ControladorMetodoGranM import *
 
@@ -59,11 +60,11 @@ def main():
                   
                     granM = Controlador(configuracion[1][3],funcionObjetivo,configuracion[1][1],int(configuracion[1][0]),archivo)
                     granM.inicioControlador()
-                    float
-
+                    
                 elif configuracion[0] == 2:
-                    #----------------FALTA----------------
-                    return "dosFases"
+                    dosFases = metodoDosFases()
+                    solucionDosFases = dosFases.mainDosFases(configuracion[1][0],configuracion[1][1],archivo)
+
                 elif configuracion[0] == 3:
                     #----------------FALTA----------------
                     return "Dual"
@@ -71,3 +72,4 @@ def main():
                     #metodoDualSalida.mainDual(configuracion[1][0], configuracion[1][1], cantidadVariablesDecision, archivo)
 
 main()
+
