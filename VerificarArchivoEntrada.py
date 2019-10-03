@@ -93,7 +93,7 @@ class VerificarArchivoEntrada:
                     filaNueva.append(valor)
             filaNueva.append(fila[-2])
             coeficientesNuevosRestricciones.append(filaNueva)
-        
+      
         return [cantidadVariablesDecision, coeficientesNuevosRestricciones, coeficientesFuncionObjetivo, not tipoOptimizacion]
 
     #Funcion generarVariablesDosFases. Regresa las configuraciones necesarias para correr el metodo Dos Fases.

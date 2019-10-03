@@ -71,10 +71,13 @@ class ImprimirMetodoGranM:
 class Solucion:
     '''Impresion del resultado final'''
     
-    def __init__(self):
+    def __init__(self,acotada):
         
         self.lista=[]
         self.lista2=[]
+        self.bandera = False
+        self.acotada = acotada
+        self.variablesNegativas = False
         
     '''
     Funcion utilizada para verificar cuales variables
@@ -113,7 +116,7 @@ class Solucion:
 
     '''            
     def imprimirVariables(self,archivo,restricciones):
-        Solucion_Aux = Solucion()
+        Solucion_Aux = Solucion(self.acotada)
         archivo.write("\n\n-----------------------------------------------------------------\n ")
         aux="-> U= "+ str(self.lista2[0])+"("+ str(self.lista[1]) +": "+ str(round(self.lista2[1],2))
         for i in range(2,len(self.lista)):
@@ -122,10 +125,11 @@ class Solucion:
         print(aux+" )")
         print("\n-----------------------------------------------------------------\n  ")
         archivo.write(aux+" )\n")
+        Solucion_Aux.verificarVariablesBasicasMenor0(self.lista,self.lista2,archivo)
         Solucion_Aux.validarSolucionFactible(archivo,self.lista2,self.lista,restricciones)
 
     def validarSolucionFactible(self,archivo,lista2,lista,restricciones):
-        Solucion_Aux = Solucion()
+        Solucion_Aux = Solucion(self.acotada)
         resultado = 0
         cantidad_Restricciones = len(restricciones.matriz)
         for i in range(0,len(restricciones.matriz)):
@@ -134,28 +138,49 @@ class Solucion:
                resultado += restricciones.matriz[i][j]*lista2[indice]
 
             if (restricciones.matriz[i][len(restricciones.matriz[i])-1])== "=":
-                if resultado != (restricciones.matriz[i][len(restricciones.matriz[i])-2]):
+                if (resultado != (restricciones.matriz[i][len(restricciones.matriz[i])-2])):
                     print("La solucion al problema no es factible ya que incumple con la restriccion:"+str(i+1))
+                    self.bandera = True
                     archivo.write("\n\nLa solucion al problema no es factible ya que incumple con la restriccion:"+str(i+1)+"\n")
                     
             if (restricciones.matriz[i][len(restricciones.matriz[i])-1])== "<=":
-                if resultado > (restricciones.matriz[i][len(restricciones.matriz[i])-2]):
+                if (resultado > (restricciones.matriz[i][len(restricciones.matriz[i])-2])):
                     print("La solucion al problema no es factible ya que incumple con la restriccion:"+str(i+1))
+                    self.bandera = True
                     archivo.write("\n\nLa solucion al problema no es factible ya que incumple con la restriccion:"+str(i+1)+"\n")
 
-            else:
-               if resultado < (restricciones.matriz[i][len(restricciones.matriz[i])-2]):
-                    print("La solucion al problema no es factible ya que incumple con la restriccion:"+str(i+1))
+            if ((restricciones.matriz[i][len(restricciones.matriz[i])-1])== ">="):
+               if (resultado < (restricciones.matriz[i][len(restricciones.matriz[i])-2])):
+                    print("La solucion al problema no es factible ya que incumple con la restriccion: "+str(i+1))
+                    self.bandera = True
                     archivo.write("\n\nLa solucion al problema no es factible ya que incumple con la restriccion:"+str(i+1)+"\n")
                     
             resultado = 0
-        print("La solucion al problema es factible ya que cumple con las restricciones iniciales")
-        archivo.write("\n\nLa solucion al problema es factible ya que cumple con las restricciones iniciales\n")
-           
+        
+        if ((self.bandera) == False) and (self.acotada == False) and (self.variablesNegativas == False):
+            print("La solucion al problema es factible ya que cumple con las restricciones iniciales")
+            archivo.write("\n\nLa solucion al problema es factible ya que cumple con las restricciones iniciales\n")
+
+        
     def encontrarCampoLista(self,lista,signo):
         for i in range(0,len(lista)):
             if (lista[i]) == signo:
                 return i
+            
+    def verificarVariablesBasicasMenor0(self,lista,lista2,archivo):
+        contadorBasico = 1
+        variablesBasicas = []
+        for i in range(0,len(lista)):
+            signo = "x"+str(contadorBasico)
+            if (lista[i] == signo):
+                contadorBasico += 1
+                variablesBasicas.append(i)
+                
+        for i in range(0,len(variablesBasicas)):
+            if (lista2[variablesBasicas[i]] < 0):
+                print("La solucion al problema no es factible ya que alguna variable basica es negativa")
+                archivo.write("La solucion al problema no es factible ya que alguna variable basica es negativa")
+                self.variablesNegativas = True
    
 class Multiples_Solucion:
     '''
