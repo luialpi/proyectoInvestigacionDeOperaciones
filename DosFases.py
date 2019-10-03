@@ -19,6 +19,7 @@ class metodoDosFases:
 		self.esMaximo = esMaximo
 		self.archivo = archivo
 		infoF1 = self.generarTablaF1(tabla,esMaximo,archivo)
+		#print("infoF1[0]",infoF1[0])
 		tablaF1 = list(map(list, infoF1[0]))#Agarro la tabla
 		variablesColumnas = infoF1[1]#Agarro la lista con las variables de columnas
 		variablesFilas = infoF1[2]#Agarro la lista con las variables de filas
@@ -27,6 +28,8 @@ class metodoDosFases:
 		tablaF2 = list(map(list, infoF2[0]))
 		variablesColumnas = infoF2[1]
 		variablesFilas = infoF2[2]
+		#printTabla(tablaF2,variablesColumnas,variablesFilas)
+		return tablaF2
 	'''
 	Se realiza la fase 1.
 	Primero se agregan las variables de holgura o artificiales segun la restriccion.
@@ -39,7 +42,7 @@ class metodoDosFases:
 		aumentada = simplex.agregarVariablesSegunInecuacion(tabla)
 		tablaF1 = list(map(list, aumentada[0]))
 		filaUOriginal = tablaF1[0].copy()
-		print(filaUOriginal)
+		#print(filaUOriginal)
 		variablesColumnas = aumentada[1]
 		variablesFilas = aumentada[2]
 		for i in range(len(tablaF1[0])):
@@ -47,10 +50,6 @@ class metodoDosFases:
 			for k in range(len(tablaF1)):
 				if variablesFilas[k].startswith("R") and variablesColumnas[i].startswith(("x","S","RES")):
 					tablaF1[0][i] += tablaF1[k][i]*-1
-		#print("Tabla Original:")
-		#self.printTabla(tabla, " ", " ")
-		#print("\n\nTabla Fase 1:")
-		#self.printTabla(tablaF1, variablesColumnas, variablesFilas)
 		simplex.inicializarSimplex(False, tablaF1,True, archivo, variablesColumnas, variablesFilas)
 		infoF1 = simplex.mainSimplex()
 		infoF1+=[filaUOriginal] #Para enviarla a fase 2 a sustituir
@@ -111,11 +110,11 @@ class metodoDosFases:
 		print("\nVariables de las Filas:")
 		print(variablesFilas)
 		print()
-'''
-	
+
+	'''
 
 #x = metodoDosFases()
 #[[0.4,0.5,0,'='],[0.3,0.1,2.7,'<='],[0.5,0.5,6,'='],[0.6,0.4,6,'>=']],False
 #[[4,2,3,5,0,'='],[2,3,4,2,300,'='],[3,1,1,5,300,'=']],True
 #[[2000,500,0,'='],[2,3,36,'>='],[3,6,60,'>=']],False
-#x.mainDosFases([[2000,500,0,'='],[2,3,36,'>='],[3,6,60,'>=']],False,"")
+#x.mainDosFases([[0.4,0.5,0,'='],[0.3,0.1,2.7,'<='],[0.5,0.5,6,'='],[0.6,0.4,6,'>=']],False,"")
