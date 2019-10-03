@@ -50,6 +50,7 @@ class metodoDosFases:
 			for k in range(len(tablaF1)):
 				if variablesFilas[k].startswith("R") and variablesColumnas[i].startswith(("x","S","RES")):
 					tablaF1[0][i] += tablaF1[k][i]*-1
+		print("Tablas Fase 1:")
 		simplex.inicializarSimplex(False, tablaF1,True, archivo, variablesColumnas, variablesFilas)
 		infoF1 = simplex.mainSimplex()
 		infoF1+=[filaUOriginal] #Para enviarla a fase 2 a sustituir
@@ -78,6 +79,7 @@ class metodoDosFases:
 		#print("\n\nTabla Fase 2:")
 		#self.printTabla(tabla, variablesColumnas, variablesFilas)
 		#print("\n\nTabla después de hacerCeros")
+		print("Tablas Fase 2:")
 		tabla = self.hacerCeros(tabla,variablesColumnas,variablesFilas)
 		#self.printTabla(tabla, variablesColumnas, variablesFilas)
 		simplex.inicializarSimplex(False, tabla, esMaximo, archivo, variablesColumnas, variablesFilas)
@@ -118,3 +120,4 @@ class metodoDosFases:
 #[[4,2,3,5,0,'='],[2,3,4,2,300,'='],[3,1,1,5,300,'=']],True
 #[[2000,500,0,'='],[2,3,36,'>='],[3,6,60,'>=']],False
 #x.mainDosFases([[0.4,0.5,0,'='],[0.3,0.1,2.7,'<='],[0.5,0.5,6,'='],[0.6,0.4,6,'>=']],False,"")
+
