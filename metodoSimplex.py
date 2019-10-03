@@ -59,7 +59,7 @@ class MetodoSimplex:
 		pivotMin=self.tablaSimplex[0][0]
 		columna_pivot_indice_max=0
 		columna_pivot_indice_min=0
-		for x in range(cantidadDeColumnas-2):
+		for x in range(cantidadDeColumnas-1):
 			if pivotMax > self.tablaSimplex[0][x] and self.tablaSimplex[0][x] < 0 :
 				pivotMax = (self.tablaSimplex[0][x])
 				columna_pivot_indice_max=x
@@ -170,10 +170,11 @@ class MetodoSimplex:
 		for n in range(1,len(inecuaciones)):
 			if(inecuaciones[n] == '>='):
 				self.agregarVariable(n,tabla,-1);
-				nombresColumnas.append("S" + str(totalDeArtificiales))
+				nombresColumnas.append("S" + str(totalDeExceso))
 				nombresColumnas.append("R" + str(totalDeArtificiales))
 				nombresFilas.append("R" + str(totalDeArtificiales))
 				totalDeArtificiales+=1
+				totalDeExceso+=1
 			if(inecuaciones[n] == '<='):
 				nombresColumnas.append("S" + str(totalDeExceso))
 				nombresFilas.append("S" + str(totalDeExceso))
@@ -197,7 +198,7 @@ class MetodoSimplex:
 			self.tablaSimplex[0][i]*=-1
  		
 	def agregarVariablesNoBasicas(self, tabla):
-		cantidadDeVariables = len(tabla)-1
+		cantidadDeVariables = len(tabla)-2
 		nombresColumnas=[]
 		for valor in range(cantidadDeVariables):
 			nombresColumnas.append("x" + str(valor + 1))
