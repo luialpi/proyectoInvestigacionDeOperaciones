@@ -1,4 +1,4 @@
-class VerificarArchivoEntrada:
+}class VerificarArchivoEntrada:
 
     global nombreArchivoEntrada
     global metodo #Variable tipo float. 0=Simplex, 1=GranM, 2=DosFases, 3=Dual
@@ -96,13 +96,41 @@ class VerificarArchivoEntrada:
       
         return [cantidadVariablesDecision, coeficientesNuevosRestricciones, coeficientesFuncionObjetivo, not tipoOptimizacion]
 
-    #Funcion generarVariablesDosFases. Regresa las configuraciones necesarias para correr el metodo Dos Fases.
+    #Funcion generarVariablesDosFases. Regresa las configuraciones necesarias para correr el metodo dos fases.
     #Entradas:
-    #----------------------------PENDIENTE-------------------
+    #   cantidadVariablesDecision. Variable tipo float. Cantidad de variables de decision
+    #   cantidadRestricciones. Variable tipo float. Cantidad de restricciones
+    #   coeficientesFuncionObjetivo. Variable tipo Lista de floats. Los coeficientes de las variables de la funcion objetivo
+    #   coeficientesRestricciones. Variable tipo Matriz de floats. Los coeficientes de las restricciones y su signo
+    #   tipoOptimizacion. Variable tipo booleana. True=max, False=min
     #Salidas:
-    #----------------------------PENDIENTE-------------------
+    #   matrizInicial. Regresa la matriz inicial necesaria para empezar el dos fases.
+    #       ejemplo: [[3, 5, 0, "="], [2, 1, 6, "<="], [-1, 3, 9, "="], [0, 1, 4, ">="]]
+    #   tipoOptimizacion. Variable tipo booleana. True=max, False=min
     def generarVariablesDosFases():
-        return "variablesDosFases"
+        global cantidadVariablesDecision
+        global cantidadRestricciones
+        global coeficientesFuncionObjetivo
+        global coeficientesRestricciones
+        global tipoOptimizacion
+        
+        matrizInicial = []
+        matrizInicial.append(coeficientesFuncionObjetivo) #Formato [[3, 5, 0, "="], [2, 1, 6, "<="], [-1, 3, 9, "="], [0, 1, 4, ">="]]
+
+        #Este for genera la matriz que se ocupa para el metodo dosFases. 
+        for fila in coeficientesRestricciones:
+            filaNueva = []
+            for valor in fila:
+                if valor not in ["=", ">=", "<="]:
+                    filaNueva.append(valor)
+            filaNueva.append(fila[-2])
+            matrizInicial.append(filaNueva)
+
+
+        #print("Matriz Inicial",matrizInicial)
+        
+        return [matrizInicial, tipoOptimizacion]
+
 
     #Funcion generarVariablesDual. Regresa las configuraciones necesarias para correr el metodo Dual.
     #Entradas:
