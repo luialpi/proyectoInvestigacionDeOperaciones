@@ -1,3 +1,4 @@
+from Imprimir import *
 class MetodoSimplex:
 
 	def __init__(self):
@@ -8,6 +9,7 @@ class MetodoSimplex:
 	'''
 	def inicializarSimplex(self, simplexVar, matriz, esMaximo, archivo, variablesColumnas=None, variablesFilas=None):
 		self.archivo = archivo
+		tablaResultado = []
 		if simplexVar == True:
 			tablaResultado = self.agregarVariablesSegunInecuacion(matriz)
 			self.tablaSimplex = tablaResultado[0]
@@ -28,6 +30,7 @@ class MetodoSimplex:
 		cantidadDeColumnas = len(self.tablaSimplex[0])
 		columnaPivot = -1
 		filaPivot = -1
+		Imprimir.imprimirMatrizSimplex(self.archivo, self.variablesFilas, self.variablesColumnas, self.tablaSimplex)
 		while(self.optimo(cantidadDeColumnas)):
 			columnaPivot = self.encontrarColumnaPivot(cantidadDeColumnas)
 			filaPivotYDegenerada = self.encontrarFilaPivot(cantidadDeFilas,cantidadDeColumnas,columnaPivot)
@@ -40,8 +43,13 @@ class MetodoSimplex:
 				return []
 			self.modificarFilaPivot(cantidadDeColumnas,columnaPivot,filaPivot)
 			self.modificarFilas(cantidadDeFilas,cantidadDeColumnas,columnaPivot,filaPivot)
+			self.imprimirDatosDeIteracion(filaPivot,columnaPivot)
 		return [self.tablaSimplex, self.variablesColumnas, self.variablesFilas]
 
+	def imprimirDatosDeIteracion(self,filaPivot,columnaPivot):
+		self.archivo.write("VB entrante:"+str(self.variablesColumnas[columnaPivot])+", VB saliente: "+ str(self.variablesFilas[filaPivot])+" Numero Pivot: "+self.tablaSimplex[filaPivot][columnaPivot])
+		Imprimir.imprimirMatrizSimplex(self.archivo, self.variablesFilas, self.variablesColumnas, self.tablaSimplex)
+	
 	'''
 	Funcion encargada la columnaPivot
 	'''
@@ -174,7 +182,7 @@ class MetodoSimplex:
 				nombresFilas.append("R" + str(totalDeArtificiales))
 				totalDeArtificiales+=1
 			self.agregarVariable(n,tabla,1);
-		nombresColumnas.append("RESULTADO")
+		nombresColumnas.append("SOL")
 		return [tabla,nombresColumnas,nombresFilas]
 
 	def agregarVariable(self, n, tabla, valor):
