@@ -30,11 +30,11 @@ class MetodoSimplex:
 		cantidadDeColumnas = len(self.tablaSimplex[0])
 		columnaPivot = -1
 		filaPivot = -1
-		Imprimir.imprimirMatrizSimplex(self.archivo, self.variablesFilas, self.variablesColumnas, self.tablaSimplex)
 		while(self.optimo(cantidadDeColumnas)):
 			columnaPivot = self.encontrarColumnaPivot(cantidadDeColumnas)
 			filaPivotYDegenerada = self.encontrarFilaPivot(cantidadDeFilas,cantidadDeColumnas,columnaPivot)
 			filaPivot = filaPivotYDegenerada[0]
+			self.imprimirDatosDeIteracion(filaPivot,columnaPivot)
 			self.intercambiarVariableEntrante(columnaPivot,filaPivot)
 			if(self.verificarDegenerada(filaPivotYDegenerada[1])):
 				archivo.write("La solucion de este archivo es degenerada.")
@@ -43,12 +43,13 @@ class MetodoSimplex:
 				return []
 			self.modificarFilaPivot(cantidadDeColumnas,columnaPivot,filaPivot)
 			self.modificarFilas(cantidadDeFilas,cantidadDeColumnas,columnaPivot,filaPivot)
-			self.imprimirDatosDeIteracion(filaPivot,columnaPivot)
+		Imprimir.imprimirMatrizSimplex(self.archivo, self.variablesFilas, self.variablesColumnas, self.tablaSimplex)
 		return [self.tablaSimplex, self.variablesColumnas, self.variablesFilas]
 
 	def imprimirDatosDeIteracion(self,filaPivot,columnaPivot):
-		self.archivo.write("VB entrante:"+str(self.variablesColumnas[columnaPivot])+", VB saliente: "+ str(self.variablesFilas[filaPivot])+" Numero Pivot: "+self.tablaSimplex[filaPivot][columnaPivot])
 		Imprimir.imprimirMatrizSimplex(self.archivo, self.variablesFilas, self.variablesColumnas, self.tablaSimplex)
+		self.archivo.write("VB entrante:"+str(self.variablesColumnas[columnaPivot])+", VB saliente: "+ str(self.variablesFilas[filaPivot])+" Numero Pivot: "+ str(self.tablaSimplex[filaPivot][columnaPivot]))
+		
 	
 	'''
 	Funcion encargada la columnaPivot
