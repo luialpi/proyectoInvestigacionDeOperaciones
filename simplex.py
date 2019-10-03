@@ -66,7 +66,7 @@ def main():
                     solucionDosFases = dosFases.mainDosFases(configuracion[1][0],configuracion[1][1],archivo)
 
                 elif configuracion[0] == 3:
-                    metodoDualSalida = metodoDual()
+                    metodoDualSalida = MetodoDual()
                     metodoDualSalida.mainDual(configuracion[1][0], configuracion[1][1], archivo)
 
 main()

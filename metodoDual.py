@@ -14,22 +14,22 @@ class MetodoDual:
 		matrizTranspuesta=self.transpuesta(matrizSinRestricciones)
 		matrizDual=self.moverUDeFilaArriba(matrizTranspuesta)
 		matrizDualFinal=self.agregarRestricciones(matrizDual,esMaximo)
-		dosFases = metodoDosFases()
-		solucionDosFases = dosFases.mainDosFases(matrizDualFinal,not esMaximo,archivo)
+
+
+		#dosFases = metodoDosFases()
+		#solucionDosFases = dosFases.mainDosFases(matrizDualFinal,not esMaximo,archivo)
 		
 
-		# granM = Controlador(not esMaximo,matrizDualFinal[0][:-1],matrizDualFinal[1:],len(matrizDualFinal[0])-1,archivo)
-		# granM.inicioControlador()
+		granM = Controlador(not esMaximo,matrizDualFinal[0][:-1],matrizDualFinal[1:],len(matrizDualFinal[0])-1,archivo)
+		granM.inicioControlador()
 
 	def transpuesta(self, matrizDual):
 		resultado =[]
-		for j in range(len(matrizDual)):
+		for j in range(len(matrizDual[0])):
 			fila = []
-			for i in range(len(matrizDual[0])):
-				print(matrizDual[i][j])
+			for i in range(len(matrizDual)):
 				fila.append(matrizDual[i][j])
 			resultado.append(fila)
-			
 		return resultado
 
 	def verificarFilas(self,matriz,matrizSinRestricciones,esMaximo):
