@@ -138,7 +138,25 @@ class VerificarArchivoEntrada:
     #Salidas:
     #----------------------------PENDIENTE-------------------
     def generarVariablesDual():
-        return "variablesDual"
+        global cantidadVariablesDecision
+        global cantidadRestricciones
+        global coeficientesFuncionObjetivo
+        global coeficientesRestricciones
+        global tipoOptimizacion
+        
+        matrizInicial = []
+        matrizInicial.append(coeficientesFuncionObjetivo) #Formato [[3, 5, 0, "="], [2, 1, 6, "<="], [-1, 3, 9, "="], [0, 1, 4, ">="]]
+
+        #Este for genera la matriz que se ocupa para el metodo dosFases. 
+        for fila in coeficientesRestricciones:
+            filaNueva = []
+            for valor in fila:
+                if valor not in ["=", ">=", "<="]:
+                    filaNueva.append(valor)
+            filaNueva.append(fila[-2])
+            matrizInicial.append(filaNueva)
+        
+        return [matrizInicial, tipoOptimizacion]
         
     
     #Funcion leerArchivo. Lee el archivo de configuracion para convertirlo en una lista.
